@@ -1,0 +1,202 @@
+논리적 이중화
+docker run -d -it --name postlr01 --hostname postlr01 --net mybridge --ip 172.20.0.115 --privileged oraclelinux:8 /sbin/init
+
+docker run -d -it --name postlr02 --hostname postlr02 --net mybridge --ip 172.20.0.116 --privileged oraclelinux:8 /sbin/init
+
+양 쪽에 DB, 테이블 생성
+
+postgres=# create database nano
+postgres-# ;
+CREATE DATABASE
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# create table test1 (col1 int primary key); -- Primary key 설정해야 함
+CREATE TABLE
+nano=#
+
+
+마스터/스탠바이의 postgresql.conf에 아래 설정
+listen_addresses=*
+wal_level=logical
+
+마스터/스탠바이의 이중화 계정 생성
+create user repuser with replication encrypted password 'repuser';
+
+마스터/스탠바이의 pg_hba.conf에 repuser 계정 접근설정
+host    all   repuser     172.20.0.1/16    md5
+
+마스터의 nano 데이터베이스에 publication 생성
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# create publication pub_nano for table test1;
+CREATE PUBLICATION
+nano=#
+
+슬레이브의 nano 데이터베이스에 subscription 생성
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# create subscription sub_nano connection 'host=172.20.0.115 port=5432 user=repuser password=repuser dbname=nano' publication pub_nano;
+NOTICE:  created replication slot "sub_nano" on publisher
+CREATE SUBSCRIPTION
+
+슬레이브의 subscription 상태 조회
+nano=# select * from pg_stat_subscription;
+ subid | subname  | pid | relid | received_lsn |      last_msg_send_time      |     last_msg_receipt_time     | latest_end_lsn |       latest_end_ti
+me
+-------+----------+-----+-------+--------------+------------------------------+-------------------------------+----------------+--------------------
+----------
+ 16393 | sub_nano | 568 |       | 0/16697F0    | 2025-01-29 04:27:29.15671+00 | 2025-01-29 04:27:29.156827+00 | 0/16697F0      | 2025-01-29 04:27:29
+.15671+00
+(1 row)
+
+test1 테이블 건수 0건
+nano=# select * from test1;
+ col1
+------
+(0 rows)
+
+
+마스터의 test1에 데이터 입력
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# insert into test1 values (1);
+INSERT 0 1
+nano=# select * from test1;
+ col1
+------
+    1
+(1 row)
+
+
+슬레이브의 건수 조회
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# insert into test1 values (1);
+INSERT 0 1
+nano=# select * from test1;
+ col1
+------
+    1
+(1 row)
+
+
+
+논리적 이중화 노드 추가
+
+docker run -d -it --name postlr03 --hostname postlr03 --net mybridge --ip 172.20.0.117 --privileged oraclelinux:8 /sbin/init
+
+.. 설치과정은 생략...
+
+vi pg_hba.conf
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+host    all             repuser         172.20.0.1/16           md5 -- 추가
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+local   replication     all                                     trust
+host    replication     all             127.0.0.1/32            trust
+host    replication     all             ::1/128                 trust
+
+pg_hba 설정 리로드
+pg_ctl reload
+
+DB, Table 생성
+psql
+postgres=# create database nano;
+CREATE DATABASE
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+
+nano=# create table test1 (col1 int primary key);
+CREATE TABLE
+--> 테이블 생성, 데이터는 없음
+nano=# exit
+[postgres@postlr03 data]$ vi pg_hba.conf
+[postgres@postlr03 data]$ pg_ctl reload
+server signaled
+[postgres@postlr03 data]$ psql
+psql (12.22)
+Type "help" for help.
+
+Subscription 생성
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# create subscription sub_nano connection 'host=172.20.0.115 port=5432 user=repuser password=repuser dbname=nano' p
+ublication pub_nano;
+ERROR:  could not create replication slot "sub_nano": ERROR:  replication slot "sub_nano" already exists
+
+nano=# create subscription sub_nano2 connection 'host=172.20.0.115 port=5432 user=repuser password=repuser dbname=nano'
+publication pub_nano;
+NOTICE:  created replication slot "sub_nano2" on publisher
+CREATE SUBSCRIPTION
+
+
+nano=# \x
+Expanded display is off.
+nano=# select * from pg_stat_subscription;
+ subid |  subname  | pid | relid | received_lsn |      last_msg_send_time       |     last_msg_receipt_time     | latest_end_lsn |        latest_end
+_time
+-------+-----------+-----+-------+--------------+-------------------------------+-------------------------------+----------------+------------------
+-------------
+ 16391 | sub_nano2 | 734 |       | 0/1669F50    | 2025-01-30 23:28:40.449649+00 | 2025-01-30 23:28:40.449809+00 | 0/1669F50      | 2025-01-30 23:28:
+40.449649+00
+(1 row)
+
+Publication과 동기화
+nano=# alter subscription sub_nano2 refresh publication;
+ALTER SUBSCRIPTION
+
+데이터 조회
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+(4 rows)
+
+
+동기화 테스트
+
+postlr01(마스터)에서 insert
+
+nano=# insert into test1 values(5);
+INSERT 0 1
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    5
+(5 rows)
+-> 5건
+
+postlr02(스탠바이1) 조회결과
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    5
+(5 rows)
+
+postlr03(스탠바이2) 조회결과
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    5
+(5 rows)
+
