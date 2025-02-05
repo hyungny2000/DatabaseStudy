@@ -7,6 +7,7 @@ PostgreSQL Download : https://www.postgresql.org/download/
 홈페이지에 제시한 방법으로 설치 진행한다.
 root계정으로 실행하면 sudo는 불필요하다.
 1) Repository 설치 : sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+                          (64bit의 리포지토리 기준)
 2) Disable built-in PostgreSQL : sudo dnf -qy module disable postgresql
 3) PostgreSQL 설치 : sudo dnf install -y postgresql12-server
 
