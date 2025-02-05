@@ -20,6 +20,7 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본지식 및 실습방법
      -p 5432:5432 : 포트포워딩 옵션. -p <로컬PC포트번호>:<컨테이너포트번호>로 매핑
      -oraclelinux:8 : 초기 이미지로 oraclelinux의 8버전 이미지를 사용한다.
                       로컬에 이미지가 없을 경우 docker hub에서 다운받고 로컬에 저장한다.
+                      다운받은 다음부터는 로컬에서 이미지를 불러온다.
 
 3. docker 컨테이너에 접속한다.
    - docker exec -it postdb01 /bin/bash
