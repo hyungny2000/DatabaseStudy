@@ -1,0 +1,164 @@
+[online recovery]
+
+현재 상황
+[postgres@pgpool_manager ~]$ pcp_node_info -U postgres -W
+Password:
+172.20.0.121 5432 3 0.500000 down down primary unknown 0 none none 2025-02-03 22:52:50
+172.20.0.122 5432 2 0.500000 up up standby primary 0 none none 2025-02-03 22:52:50
+
+pgpool_db01 DB다운, 장애조치의 결과로 pgpool_db02를 마스터로 하여 서비스 중임
+DB데이터 변경도 발생해 DB1의 데이터가 과거버전이 되었음.
+이대로는 DB01로 바로 절체는 못하기때문에
+pgpool_db01을 db02와 동기화하고 이중화하고 pgpool에 스탠바이로 등록해야 함
+이를 online recovery라고 함
+recovery_1st_statge_command = '/recovery_1st_stage.sh'에 해당하는 스크립트를 작성해야 함
+recovery_1st_stage.sh에는 
+1. db01의 $PGDATA디렉토리를 깨끗이 비우고
+2. 현 마스터(db02)의 파일들을 가져와야 함
+3. 스탠바이 구동을 위한 셋팅을 한다.
+   -- standby.signal 파일 생성 등
+이렇게 구현하고 pcp_recovery_node -n 0 (db01 노드번호)를 입력하면
+스탠바이DB를 알아서 구동하고 노드등록까지 해줄 것임.
+
+
+가용한 아규먼트
+#recovery_1st_stage_command = ''
+                                   # Executes a command in first stage
+-- 없네
+
+ChatGPT에 물어본 결과
+%d	메인(Primary) 노드의 데이터베이스 클러스터 경로 (PGDATA)	기본
+%h	복구 대상 백엔드 노드의 호스트명	기본
+%D	복구 대상 백엔드 노드의 데이터베이스 클러스터 경로 (PGDATA)	기본
+%p	메인(Primary) 노드의 포트 번호	3.4
+%r	복구 대상 노드의 노드 번호	4.0
+%P	복구 대상 노드의 포트 번호	4.1
+%m	메인(Primary) 노드의 호스트명	4.3
+
+
+recovery_1st_stage.sh.sample 발췌
+PRIMARY_NODE_PGDATA="$1" -- 현 마스터DB의 PGDATA
+DEST_NODE_HOST="$2" -- 복구대상 노드 IP
+DEST_NODE_PGDATA="$3"
+PRIMARY_NODE_PORT="$4"
+DEST_NODE_ID="$5"
+DEST_NODE_PORT="$6"
+PRIMARY_NODE_HOST="$7"
+
+
+recovery_1st_stage.sh
+#!/bin/bash
+#This script will be run by recovery_1st_stage_command parameter
+
+PRIMARY_NODE_HOST="$1"
+PRIMARY_NODE_PORT="$2"
+DEST_NODE_HOST="$3"
+DEST_NODE_PORT="$4"
+DEST_NODE_PGDATA="$5"
+
+PGHOME=/usr/pgsql-12
+REPL_SLOT_NAME=$(echo ${DEST_NODE_HOST,,} | tr -- -. _)
+POSTGRESQL_STARTUP_USER=postgres
+SSH_OPTIONS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${SSH_KEY_FILE}"
+RM_PATH=/usr/bin
+
+echo recovery_1st_stage.sh : starting to recover $DEST_NODE_HOST as a standby to PRIMARY_NODE_HOST
+echo recovery_1st_stage.sh : removing contents in PGDATA of $DEST_NODE_HOST
+
+ssh -T ${SSH_OPTIONS} ${POSTGRESQL_STARTUP_USER}@${DEST_NODE_HOST} ${RM_PATH}/rm -rf ${DEST_NODE_PGDATA}/*
+
+echo recovery_1st_stage.sh : synchronizing data directory and creating replication slots through pg_basebackup
+
+ssh -T ${SSH_OPTIONS} ${POSTGRESQL_STARTUP_USER}@${NEW_MAIN_NODE_IP} ${PGHOME}/bin/pg_basebackup -D ${DEST_NODE_PGDATA} -h ${PRIMARY_NODE_HOST} -p ${PRIMARY_NODE_PORT} -P -R -C -S ${REPL_SLOT_NAME}
+
+echo recovery_1st_stage.sh : pg_basebackup job succedded
+
+
+
+pgpool.conf 수정
+recovery_user = 'repuser' -- 현 마스터DB에서 생성된 이중화 용도 DB계정 (여기선 repuser)
+recovery_password = 'repuser' -- 패스워드
+recovery_1st_stage_command = '/usr/local/pgpool/etc/recovery_1st_stage.sh %m %p %h %P %D'
+
+
+
+복구 시도
+[postgres@pgpool_manager etc]$ pcp_recovery_node -n 0 -U postgres -W
+Password:
+ERROR:  node recovery failed, unable to connect to main node: 1
+
+[postgres@pgpool_manager etc]$
+
+025-02-03 23:39:09.062: pcp_child pid 386: ERROR:  node recovery failed, unable to connect to main node: 1
+2025-02-03 23:39:09.064: pcp_main pid 313: LOG:  PCP process with pid: 386 exit with SUCCESS.
+2025-02-03 23:39:09.064: pcp_main pid 313: LOG:  PCP process with pid: 386 exits with status 0
+
+1번 노드 (현 마스터노드) 접속불가라고 함
+
+[postgres@pgpool_db02 data]$ pg_ctl status
+pg_ctl: server is running (PID: 108)
+/usr/pgsql-12/bin/postgres
+[postgres@pgpool_db02 data]$ psql
+psql (12.22)
+Type "help" for help.
+
+postgres=# select * from pg_is_in_recovery();
+ pg_is_in_recovery
+-------------------
+ f
+(1 row)
+
+postgres=#
+
+-- 잘 떠 있는데?
+
+postgres=# \du
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ pgpool    |                                                            | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ repuser   | Replication                                                | {}
+
+# replication privilege.
+local   replication     all                                     trust
+host    replication     all             127.0.0.1/32            trust
+host    replication     all             ::1/128                 trust
+host    replication     repuser         172.20.0.1/16           md5
+
+-- repuser도 잘 있는데?
+
+
+-- pgpool.conf의 log level을 debug1로 조정하고 재기동 후 재시도
+
+
+2025-02-04 23:18:47.128: pcp_child pid 391: DEBUG:  PCP: processing recovery request -- 복구요청 수행중
+2025-02-04 23:18:47.128: pcp_child pid 391: DETAIL:  start online recovery -- 온라인 리커버리 실시
+2025-02-04 23:18:47.128: pcp_child pid 391: LOCATION:  pcp_worker.c:1231
+2025-02-04 23:18:47.128: pcp_child pid 391: LOG:  starting recovering node 0 -- 0번노드 복구시작
+2025-02-04 23:18:47.128: pcp_child pid 391: LOCATION:  recovery.c:74
+2025-02-04 23:18:47.131: pcp_child pid 391: DEBUG:  sending signal:12 to the parent process with PID:350
+2025-02-04 23:18:47.131: pcp_child pid 391: LOCATION:  pool_signal.c:178
+2025-02-04 23:18:47.131: pcp_child pid 391: ERROR:  node recovery failed, unable to connect to main node: 1 -- 1번노드 연결실패
+
+-- pgpool.conf의 log level을 debug2로 조정하고 재기동 후 재시도
+2025-02-04 23:23:33.567: pcp_child pid 443: DETAIL:  start online recovery
+2025-02-04 23:23:33.567: pcp_child pid 443: LOCATION:  pcp_worker.c:1231
+2025-02-04 23:23:33.567: pcp_child pid 443: LOG:  starting recovering node 0
+2025-02-04 23:23:33.567: pcp_child pid 443: LOCATION:  recovery.c:74
+2025-02-04 23:23:33.571: pcp_child pid 443: DEBUG:  sending signal:12 to the parent process with PID:402
+2025-02-04 23:23:33.571: pcp_child pid 443: LOCATION:  pool_signal.c:178
+2025-02-04 23:23:33.571: pcp_child pid 443: ERROR:  node recovery failed, unable to connect to main node: 1
+
+-- 뭐가 다른데????
+
+-- pgpool.conf의 log level을 debug5로 조정하고 재기동 후 재시도
+2025-02-04 23:27:04.005: pcp_child pid 492: DEBUG:  PCP: processing recovery request
+2025-02-04 23:27:04.005: pcp_child pid 492: DETAIL:  start online recovery
+2025-02-04 23:27:04.005: pcp_child pid 492: LOCATION:  pcp_worker.c:1231
+2025-02-04 23:27:04.005: pcp_child pid 492: LOG:  starting recovering node 0
+2025-02-04 23:27:04.005: pcp_child pid 492: LOCATION:  recovery.c:74
+2025-02-04 23:27:04.007: pcp_child pid 492: DEBUG:  sending signal:12 to the parent process with PID:452
+2025-02-04 23:27:04.007: pcp_child pid 492: LOCATION:  pool_signal.c:178
+2025-02-04 23:27:04.007: pcp_child pid 492: ERROR:  node recovery failed, unable to connect to main node: 1
+-- 포기
