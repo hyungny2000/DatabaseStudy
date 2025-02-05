@@ -197,3 +197,73 @@ replay_lag       |
 sync_priority    | 0
 sync_state       | async
 reply_time       | 2025-02-05 11:01:52.982232+00
+
+
+마스터DB에서 nano 데이터베이스, test1 테이블 생성
+
+postgres=# create database nano;
+CREATE DATABASE
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# create table test1 (col1 int primary key);
+CREATE TABLE
+nano=# insert into test1 values (1);
+INSERT 0 1
+nano=# insert into test1 values (2);
+INSERT 0 1
+nano=# insert into test1 values (3);
+INSERT 0 1
+nano=# insert into test1 values (4);
+INSERT 0 1
+nano=# insert into test1 values (5);
+INSERT 0 1
+nano=# select  * from test1;
+-[ RECORD 1 ]
+col1 | 1
+-[ RECORD 2 ]
+col1 | 2
+-[ RECORD 3 ]
+col1 | 3
+-[ RECORD 4 ]
+col1 | 4
+-[ RECORD 5 ]
+col1 | 5
+
+Expanded display is off.
+nano=# select  * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    5
+(5 rows)
+
+
+스탠바이DB에서 nano 데이터베이스, test1 테이블 조회
+postgres=# \l
+                             List of databases
+   Name    |  Owner   | Encoding  | Collate | Ctype |   Access privileges
+-----------+----------+-----------+---------+-------+-----------------------
+ nano      | postgres | SQL_ASCII | C       | C     |
+ postgres  | postgres | SQL_ASCII | C       | C     |
+ template0 | postgres | SQL_ASCII | C       | C     | =c/postgres          +
+           |          |           |         |       | postgres=CTc/postgres
+ template1 | postgres | SQL_ASCII | C       | C     | =c/postgres          +
+           |          |           |         |       | postgres=CTc/postgres
+(4 rows)
+
+postgres=# \c nano -- 마스터DB에서 생성한 nano 데이터베이스가 동기화되어 생성됨
+You are now connected to database "nano" as user "postgres".
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    5 -- 데이터 동기화 완료
+(5 rows)
+
+nano=#
