@@ -27,5 +27,9 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본지식 및 실습방법
      -it : ssh모드로 상호작용하기 위한 모드
      -/bin/bash : exec로 실행할 명령어 (bash셀 실행)
 
+4. docker 컨테이너 종료
+   - docker stop postdb01
 
+5. docker 컨테이너 시작
+   - docker start postdb01
     
