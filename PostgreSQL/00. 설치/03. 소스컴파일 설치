@@ -13,11 +13,14 @@ docker exec -it postdb02 /bin/bash
 https://www.postgresql.org/ftp/source/
 postgresql-12.22.tar.gz
 
-의존패키지 설치
+소스컴파일용 의존패키지 설치
 (레드햇)
 # yum -y install readline-devel zlib-devel gcc make libicu-devel
 (우분투, 데비안)
 # apt-get install gcc build-essential zlib1g-dev libreadline6-dev libicu-dev pkg-config
+
+기타 필요한 패키지
+yum -y install tar
 
 postgres계정 생성
 # useradd -d /home/postgres postgres
