@@ -35,6 +35,7 @@ Installed:
 Complete!
 [root@mariadb01 MARIA_DATA]#
 
+핫 백업 실시
 [root@mariadb01 MARIA_BACKUP]# mariabackup --backup --target-dir=/MARIA_BACKUP --user=root
 [00] 2025-01-27 00:08:09 Connecting to server host: localhost, user: root, password: not set, port: not set, socket: not set
 [00] 2025-01-27 00:08:09 Using server version 10.5.27-MariaDB
@@ -55,6 +56,7 @@ mariabackup based on MariaDB server 10.5.27-MariaDB Linux (aarch64)
 [00] 2025-01-27 00:08:11 Redo log (from LSN 45163 to 45175) was copied.
 [00] 2025-01-27 00:08:11 completed OK!
 
+백업 직후 생성된 파일 목록
 [root@mariadb01 MARIA_BACKUP]# ls -rlth
 total 13M
 -rw-r----- 1 root root  12M Jan 27 00:08 ibdata1
@@ -63,10 +65,10 @@ drwx------ 2 root root 4.0K Jan 27 00:08 mysql
 drwx------ 2 root root 4.0K Jan 27 00:08 performance_schema
 -rw-r----- 1 root root   52 Jan 27 00:08 aria_log_control
 -rw-r----- 1 root root  24K Jan 27 00:08 aria_log.00000001
--rw-r----- 1 root root   97 Jan 27 00:08 xtrabackup_checkpoints
+-rw-r----- 1 root root   97 Jan 27 00:08 xtrabackup_checkpoints -- 백업 직후의 상태 기록한 파일
 -rw-r----- 1 root root 2.5K Jan 27 00:08 ib_logfile0 -- 리두로그 2.5KB
--rw-r----- 1 root root  285 Jan 27 00:08 backup-my.cnf
--rw-r----- 1 root root  429 Jan 27 00:08 xtrabackup_info
+-rw-r----- 1 root root  285 Jan 27 00:08 backup-my.cnf -- my.cnf 백업
+-rw-r----- 1 root root  429 Jan 27 00:08 xtrabackup_info -- 백업내역 파일
 
 [root@mariadb01 MARIA_BACKUP]# cat xtrabackup_checkpoints
 backup_type = full-backuped -- 백업 직후의 상태
@@ -95,6 +97,10 @@ format = file
 compressed = N
 [root@mariadb01 MARIA_BACKUP]#
 
+Prepare 단계
+-- backup 시작부터 끝까지의 변경이력이 Redo Log파일에 적재되어 있음.
+-- Redo Log의 변경이력을 데이터파일에 재생시켜 최종적으로 일관된 상태를 만들고자 함.
+-- 반드시 필요한 단계
 [root@mariadb01 MARIA_BACKUP]# mariabackup --prepare --target-dir=/MARIA_BACKUP --user=root
 
 mariabackup based on MariaDB server 10.5.27-MariaDB Linux (aarch64)
