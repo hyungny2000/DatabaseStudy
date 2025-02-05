@@ -11,7 +11,7 @@ root계정으로 실행하면 sudo는 불필요하다.
 2) Disable built-in PostgreSQL : sudo dnf -qy module disable postgresql
 3) PostgreSQL 설치 : sudo dnf install -y postgresql12-server
 
--- 이 이하는 적용하지 않는다. --
+-- 같이 복사된 스크립트 중 이 이하는 적용하지 않는다. --
 sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
 sudo systemctl enable postgresql-13
 sudo systemctl start postgresql-13
