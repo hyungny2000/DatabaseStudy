@@ -63,6 +63,18 @@ total 0
 Password:
 24641/24641 kB (100%), 1/1 tablespace
 
+-D : 복사 대상 디렉토리. (데이터 디렉토리로 설정)
+-h : 마스터DB서버의 IP
+-U : 이중화 전용 DB계정
+-p : 마스터DB 포트
+-Xs : Wal Log 전송모드를 Stream으로 설정
+-Fp : 파일(File)을 일반(Plane)파일로 전송
+      -Ft이면 압축파일(tar)로 전송
+-P : 전송 진행률 (Progresss) 표시
+-R : 이중화(Replication) 정보 기재
+-C : 마스터DB에 이중화 슬롯 생성
+-S <repl_slot_name> : 이중화 슬롯명
+
 -- 백업 끝나고 조회결과 파일 생성완료
 [postgres@postsr02 data]$ ls -rlth
 total 128K
