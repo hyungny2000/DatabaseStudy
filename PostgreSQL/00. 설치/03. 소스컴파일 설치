@@ -1,1 +1,70 @@
 소스컴파일 설치
+
+docker run -d -it --name postdb02 --hostname postdb02 --net mybridge --ip 172.20.0.3 --privileged oraclelinux:8 /sbin/init
+
+소스파일 다운로드
+https://www.postgresql.org/ftp/source/
+postgresql-12.22.tar.gz
+
+의존패키지 설치
+(레드햇)
+# yum -y install readline-devel zlib-devel gcc make libicu-devel
+(우분투, 데비안)
+# apt-get install gcc build-essential zlib1g-dev libreadline6-dev libicu-dev pkg-config
+
+postgres계정 생성
+# useradd -d /home/postgres postgres
+# passwd postgres
+
+압축파일 업로드 및 해제
+(docker) docker cp postgresql-12.22.tar.gz postdb02:/home/postgres
+# cd /home/postgres
+# tar xvf postgresql-12.22.tar.gz
+# cd postgresql-12.22
+# ./configure --help
+
+실행파일 설치위치 생성
+# mkdir /usr/pgsql-12
+
+실행파일 빌드
+1) configure
+./configure --prefix=/usr/pgsql-12
+
+2) make
+make
+(또는 make world 또는 make world-bin)
+
+3) make install 
+make install
+
+4) make contrib모듈 (postgres-contrib.rpm을 말하는 듯)
+cd contrib
+make
+make install
+
+5) 실행파일 소유자를 root->postgres로 변경
+cd /usr
+chown -R postgres:postgres pgsql
+
+postgres계정 환경변수 설정
+su - postgres
+vi .bash_profile
+
+export PGDATA=/var/lib/pgsql/12/data
+export PATH=$PATH:/usr/pgsql-12/bin
+
+:wq
+
+. .bash_profile
+echo $PGDATA
+echo $PATH
+-> 환경변수 설정값 점검
+
+DB클러스터 초기화
+initdb
+
+DB클러스터 기동
+pg_ctl start
+
+DB접속테스트
+psql
