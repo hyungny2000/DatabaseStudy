@@ -24,7 +24,8 @@ postgres계정 생성
 # passwd postgres
 
 압축파일 업로드 및 해제
-(docker) docker cp postgresql-12.22.tar.gz postdb02:/home/postgres
+cmd 창 오픈
+docker cp postgresql-12.22.tar.gz postdb02:/home/postgres
 # cd /home/postgres
 # tar xvf postgresql-12.22.tar.gz
 # cd postgresql-12.22
