@@ -60,6 +60,7 @@ listen_addresses='*'
 
 vi $PGDATA/pg_hba.conf
 host      all       postgres     172.0.0.1     trust
+:wq
 
 DB재기동
 pg_ctl restart
