@@ -1,0 +1,172 @@
+failover.sh 생성
+cd /usr/local/pgpool/etc/
+touch failover.sh
+chmod 700 failover.sh
+
+pgpool에 이렇게 되어 있음
+#failover_command = ''
+                                   # Executes this command at failover
+                                   # Special values:
+                                   #   %d = failed node id
+                                   #   %h = failed node host name
+                                   #   %p = failed node port number
+                                   #   %D = failed node database cluster path
+                                   #   %m = new main node id
+                                   #   %H = new main node hostname
+                                   #   %M = old main node id
+                                   #   %P = old primary node id
+                                   #   %r = new main port number
+                                   #   %R = new main database cluster path
+                                   #   %N = old primary node hostname
+                                   #   %S = old primary node port number
+                                   #   %% = '%' character
+
+failover_command = '/usr/local/pgpool/etc/failover.sh %N %H'
+
+vi failover.sh
+
+#!/bin/bash
+# This script is run by failover_command.
+
+OLD_PRIMARY_NODE_IP="$1"
+NEW_MAIN_NODE_IP="$2"
+
+PGHOME=/usr/pgsql-12
+PGDATA=/var/lib/pgsql/12/data
+POSTGRESQL_STARTUP_USER=postgres
+SSH_OPTIONS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+
+echo failover.sh : starting to promote $NEW_MAIN_NODE_IP as the primary node.
+
+ssh -T ${SSH_OPTIONS} ${POSTGRESQL_STARTUP_USER}@${NEW_MAIN_NODE_IP} ${PGHOME}/bin/pg_ctl -D ${PGDATA} -w promote 
+
+if [ $? -ne 0 ]; then
+    echo ERROR: failover.sh: promote failed
+    exit 1
+fi
+
+echo failover.sh : New main node $NEW_MAIN_NODE_IP was successfully promoted.
+
+exit 0
+
+:wq
+
+
+pgpool 재기동
+pgpool stop
+pgpool
+
+
+
+[failover 테스트]
+
+pgpool_db01 (현 마스터노드) down
+
+pg_ctl stop
+
+
+[pgpool 로그 확인]
+
+2025-02-03 03:18:43.389: health_check0 pid 544: LOG:  failed to connect to PostgreSQL server on "172.20.0.121:5432", getsockopt() failed
+2025-02-03 03:18:43.389: health_check0 pid 544: DETAIL:  Operation now in progress
+2025-02-03 03:18:43.389: health_check0 pid 544: LOG:  health check retrying on DB node: 0 (round:1)
+2025-02-03 03:18:43.408: sr_check_worker pid 543: LOG:  failed to connect to PostgreSQL server on "172.20.0.121:5432", getsockopt() failed
+2025-02-03 03:18:43.408: sr_check_worker pid 543: DETAIL:  Operation now in progress
+2025-02-03 03:18:44.390: health_check0 pid 544: LOG:  failed to connect to PostgreSQL server on "172.20.0.121:5432", getsockopt() failed
+2025-02-03 03:18:44.390: health_check0 pid 544: DETAIL:  Operation now in progress
+
+... (최초 10초 간격 헬스체크 후 실패 감지, 이후 1초간격으로 10번 헬스체크 재시도, 총 20초 서비스중단됨. 중략)...
+
+2025-02-03 03:18:52.402: health_check0 pid 544: LOG:  health check retrying on DB node: 0 (round:10) --10번째 시도
+2025-02-03 03:18:53.403: health_check0 pid 544: LOG:  failed to connect to PostgreSQL server on "172.20.0.121:5432", getsockopt() failed
+2025-02-03 03:18:53.403: health_check0 pid 544: DETAIL:  Operation now in progress
+2025-02-03 03:18:53.404: health_check0 pid 544: LOG:  health check failed on node 0 (timeout:0)
+2025-02-03 03:18:53.404: health_check0 pid 544: LOG:  received degenerate backend request for node_id: 0 from pid [544]
+2025-02-03 03:18:53.404: health_check0 pid 544: LOG:  signal_user1_to_parent_with_reason(0)
+2025-02-03 03:18:53.404: main pid 507: LOG:  Pgpool-II parent process received SIGUSR1
+2025-02-03 03:18:53.404: main pid 507: LOG:  Pgpool-II parent process has received failover request
+
+... (Failover 시작) .....
+
+2025-02-03 03:18:53.405: main pid 507: LOG:  === Starting degeneration. shutdown host 172.20.0.121(5432) ===
+2025-02-03 03:18:53.413: sr_check_worker pid 543: ERROR:  Failed to check replication time lag
+2025-02-03 03:18:53.413: sr_check_worker pid 543: DETAIL:  No persistent db connection for the node 0
+2025-02-03 03:18:53.413: sr_check_worker pid 543: HINT:  check sr_check_user and sr_check_password
+2025-02-03 03:18:53.413: sr_check_worker pid 543: CONTEXT:  while checking replication time lag
+2025-02-03 03:18:53.432: main pid 507: LOG:  Restart all children
+2025-02-03 03:18:53.433: main pid 507: LOG:  execute command: /usr/local/pgpool/etc/failover.sh 172.20.0.121 172.20.0.122 -- failover.sh 스크립트 실행
+failover.sh : starting to promote 172.20.0.122 as the primary node. -- failover.sh에 echo표시한 메시지 노출
+Warning: Permanently added '172.20.0.122' (ECDSA) to the list of known hosts.
+waiting for server to promote.... done
+server promoted -- 스탠바이서버(pgpool_db02) promote 중
+failover.sh : New main node 172.20.0.122 was successfully promoted. -- promote 완료 메시지 노출
+2025-02-03 03:18:53.944: main pid 507: LOG:  find_primary_node_repeatedly: waiting for finding a primary node
+2025-02-03 03:18:53.944: main pid 507: LOG:  failover: set new primary node: 0
+2025-02-03 03:18:53.944: main pid 507: LOG:  failover: set new main node: 1
+2025-02-03 03:18:53.952: sr_check_worker pid 543: LOG:  worker process received restart request
+2025-02-03 03:18:53.953: main pid 507: LOG:  === Failover done. shutdown host 172.20.0.121(5432) === -- 마스터 노드 shutdown 메시지
+2025-02-03 03:18:54.954: pcp_main pid 542: LOG:  restart request received in pcp child process
+2025-02-03 03:18:54.957: main pid 507: LOG:  PCP child 542 exits with status 0 in failover()
+2025-02-03 03:18:54.958: main pid 507: LOG:  fork a new PCP child pid 584 in failover()
+2025-02-03 03:18:54.959: pcp_main pid 584: LOG:  PCP process: 584 started
+2025-02-03 03:18:54.960: sr_check_worker pid 585: LOG:  process started
+
+
+[기존 마스터DB(pgpool_db01) 상태 확인]
+[postgres@pgpool_db01 ~]$ pg_ctl status
+pg_ctl: no server running
+-- 내가 내렸으니 안떠있는게 당연함
+
+[신규 마스터DB(pgpool_db02) 상태확인]
+[postgres@pgpool_db02 ~]$ psql
+psql (12.22)
+Type "help" for help.
+
+postgres=# select pg_is_in_recovery();
+ pg_is_in_recovery
+-------------------
+ f
+(1 row)
+ --> f 이므로 마스터DB로 승격 확인
+
+postgres=# \c nano
+You are now connected to database "nano" as user "postgres".
+nano=# insert into test1 values(6);
+INSERT 0 1
+nano=# insert into test1 values(7);
+INSERT 0 1
+nano=# select * from test1;
+ col1
+------
+    1
+    2
+    3
+    4
+    6
+    7
+(6 rows)
+
+--> 데이터변경가능 상태
+
+DBeaver에서 절체 전의 접속상태 건드리지 않고(재접속시도 없이) 그대로 조회
+
+select * from test1;
+col1|
+----+
+   1|
+   2|
+   3|
+   4|
+   6|
+   7|
+--> 현 마스터DB에서 입력된 데이터 그대로 노출됨
+
+pgpool 노드 상태 확인
+[postgres@pgpool_manager etc]$ pcp_node_info -U postgres -W
+Password:
+172.20.0.121 5432 3 0.500000 down down primary unknown 0 none none 2025-02-03 03:18:53
+172.20.0.122 5432 2 0.500000 up up standby primary 0.000000 none none 2025-02-03 03:18:23
+[postgres@pgpool_manager etc]$
+--> 172.20.0.122 (pgpool_db02, 현 마스터DB)상태가 primary임을 확인함.
+ --> 172.20.0.121 (pgpool_db01, 구 마스터DB)의 첫번째 down은 DB가 다운된 상태, down상태는 pgpool에서 축출된(dettached) 상태를 나타냄
+
