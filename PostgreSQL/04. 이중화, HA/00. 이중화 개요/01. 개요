@@ -14,7 +14,6 @@
      - 이중화 클러스터 내의 단 한대의 Active노드(마스터노드)만이 쓰기 요청을 받을 수 있음. 
      - 나머지 노드는 모두 읽기 요청만을 받아들이는 이중화 형식
      - MariaDB의 Master/Slave 이중화, PostgreSQL의 Log-Shipping, Streaming 이중화 등이 이에 속한다.
-     - MySQL/MariaDB에서는 특히 Master/Slave라고도 칭했다.
   
 3. 이중화가 필요한 이유
   1) 신속한 장애조치로 고가용성(High Availablilty) 재고
