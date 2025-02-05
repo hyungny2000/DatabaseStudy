@@ -1,0 +1,321 @@
+Log Shipping 이중화 구축
+
+네트워크 생성
+docker network create --subnet 172.20.0.0/16 mybridge
+
+Log Shipping 이중화
+docker run -d -it --name postls01 --hostname postls01 --net mybridge --ip 172.20.0.100 --privileged oraclelinux:8 /sbin/init
+docker run -d -it --name postls02 --hostname postls02 --net mybridge --ip 172.20.0.101 --privileged oraclelinux:8 /sbin/init
+
+도커 컨테이너 접속
+docker exec -it postls01 /bin/bash
+docker exec -it postls02 /bin/bash
+
+[각 노드별 postgresql 설치]
+postgres 설치
+# Install the repository RPM:
+dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-aarch64/pgdg-redhat-repo-latest.noarch.rpm
+
+# Disable the built-in PostgreSQL module:
+dnf -qy module disable postgresql
+
+# Install PostgreSQL:
+dnf install -y postgresql12-server
+
+# 필수패키지 설치
+yum -y install rsync
+
+[각 노드별 postgres 계정 설정]
+# postgres 계정 환경변수 설정
+su - postgres
+vi .bash_profile
+
+export PGHOME=/usr/pgsql-12
+export PATH=$PATH:$PGHOME/bin
+
+:wq
+
+. .bash_profile
+
+PATH, PGHOME, PGDATA 환경변수 점검
+
+[postgres@postls01 ~]$ echo $PATH
+/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/pgsql-12/bin
+[postgres@postls01 ~]$ echo $PGHOME
+/usr/pgsql-12
+[postgres@postls01 ~]$ echo $PGDATA
+/var/lib/pgsql/12/data
+[postgres@postls01 ~]$
+
+[노드 별 passwordless ssh 설정]
+
+[postgres@postls01 ~]$ ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/pgsql/.ssh/id_rsa):
+Created directory '/var/lib/pgsql/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /var/lib/pgsql/.ssh/id_rsa.
+Your public key has been saved in /var/lib/pgsql/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:vQCU2uGzFQP2A59i1yng+xw8tVuAAJqsFqectzEyGxY postgres@postls01
+The key's randomart image is:
++---[RSA 3072]----+
+|    ..Bo         |
+| . o +o*o+ .     |
+| E+. +=.Oo=      |
+|..* ..+*.= o     |
+|.X +  .+S o .    |
+|o * + .o + +     |
+| . .    o o      |
+|                 |
+|                 |
++----[SHA256]-----+
+[postgres@postls01 ~]$ ssh-copy-id 172.20.0.101
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/var/lib/pgsql/.ssh/id_rsa.pub"
+The authenticity of host '172.20.0.101 (172.20.0.101)' can't be established.
+ECDSA key fingerprint is SHA256:PFT+Sn9s643J1Ur0Yq2Y/LMJoSDf94I0FT1mOJxfDz0.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+postgres@172.20.0.101's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '172.20.0.101'"
+and check to make sure that only the key(s) you wanted were added.
+
+ssh로 스탠바이서버 접속테스트
+[postgres@postls01 ~]$ ssh 172.20.0.101
+Last failed login: Wed Feb  5 23:15:49 UTC 2025 from 172.20.0.100 on ssh:notty
+There was 1 failed login attempt since the last successful login.
+Last login: Wed Feb  5 23:15:22 2025
+[postgres@postls02 ~]$ exit
+logout
+
+
+스탠바이DB도 마찬가지로 설정
+[postgres@postls02 ~]$ ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/pgsql/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /var/lib/pgsql/.ssh/id_rsa.
+Your public key has been saved in /var/lib/pgsql/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:6DF1x/Fj9auM57UbNxb4fWK6iPhgQ7sOP0828b5Anb4 postgres@postls02
+The key's randomart image is:
++---[RSA 3072]----+
+|            .   .|
+|           . o ..|
+|        . . o + .|
+|       o o o ....|
+|      = S o  . o |
+|     o = +  o o o|
+|    . * = o. +o*+|
+|     +.B = oooo.*|
+|     .=++ E.oo o.|
++----[SHA256]-----+
+[postgres@postls02 ~]$ ssh-copy-id 172.20.0.100
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/var/lib/pgsql/.ssh/id_rsa.pub"
+The authenticity of host '172.20.0.100 (172.20.0.100)' can't be established.
+ECDSA key fingerprint is SHA256:98hhB63iFYURQWiIRAFel8zEGxK9QE+VfEGIpPCkjt4.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+postgres@172.20.0.100's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '172.20.0.100'"
+and check to make sure that only the key(s) you wanted were added.
+
+[스탠바이->마스터로 접속테스트]
+[postgres@postls02 ~]$ ssh 172.20.0.100
+Last login: Wed Feb  5 23:15:18 2025
+[postgres@postls01 ~]$ exit
+logout
+Connection to 172.20.0.100 closed.
+[postgres@postls02 ~]$
+
+Archive 디렉토리 생성
+cd /var/lib/pgsql/12
+mkdir archive
+
+[마스터DB postls01만 DB클러스터 구축]
+
+[postgres@postls01 ~]$ initdb ## $PGDATA 환경변수 설정시 -D 옵션 생략 가능
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default database encoding has accordingly been set to "SQL_ASCII".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/pgsql/12/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+initdb: warning: enabling "trust" authentication for local connections
+You can change this by editing pg_hba.conf or using the option -A, or
+--auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/pgsql/12/data -l logfile start
+
+
+DB기동 테스트
+pg_ctl start
+psql
+
+
+[마스터DB의 Archive모드 설정]
+
+vi postgresql.conf
+
+# - Archiving -
+
+archive_mode = on               # enables archiving; off, on, or always
+archive_command = 'rsync -a %p postgres@172.20.0.101:/var/lib/pgsql/12/archive/%f'              
+                                # command to use to archive a logfile segment
+                                # placeholders: %p = path of file to archive
+                                #               %f = file name only
+                                # e.g. 'test ! -f /mnt/server/archivedir/%f && cp %p /mnt/server/archivedir/%f'
+archive_timeout = 60            # force a logfile segment switch after this
+                                # number of seconds; 0 disables
+
+이후 DB재기동
+
+[postgres@postls01 data]$ pg_ctl restart
+waiting for server to shut down.... done
+server stopped
+waiting for server to start....2025-02-05 23:07:41.172 UTC [843] LOG:  starting PostgreSQL 12.22 on aarch64-unknown-linux-gnu, compiled by gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-22), 64-bit
+2025-02-05 23:07:41.176 UTC [843] LOG:  listening on IPv6 address "::1", port 5432
+2025-02-05 23:07:41.176 UTC [843] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-02-05 23:07:41.186 UTC [843] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-02-05 23:07:41.194 UTC [843] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2025-02-05 23:07:41.219 UTC [843] LOG:  redirecting log output to logging collector process
+2025-02-05 23:07:41.219 UTC [843] HINT:  Future log output will appear in directory "log".
+ done
+server started
+
+* archive_mode : 아카이브 여부
+* archive_command : 아카이빙 명령줄
+* archive_timeout : 아카이브 주기. 60초마다 아카이빙하게 함.
+
+* archive_command 분석
+  - rsync -a %p postgres@172.20.0.101:/var/lib/pgsql/12/archive/%f
+    - %p : pg_wal 디렉토리의 wal file을 의미함
+    - %f : archive 파일이름인데 wal file명을 그대로 따라감. 수정불가
+    - rsync : 파일전송 명령어 (-a는 파일의 속성을 그대로 유지한다는 의미)
+    - postgres@172.20.0.101:/var/lib/pgsql/12/archive/%f : 스탠바이DB(172.20.0.101)의 postgres계정으로 접속 후 archive 디렉토리로 전송.
+
+archive_command 실행을 위해 필요한 조건
+- 마스터-스탠바이 서버 간의 Passwordless ssh : rsync 명령시 패스워드 질문을 받지 않아야 함
+- 스탠바이DB의 archive 디렉토리 생성
+
+
+마스터DB에 Low Level 백업 명령어 실행
+psql
+select pg_start_backup('label',false,false);
+-- 명령 실행시 체크포인트 실행되어 데이터파일이 일관성을 갖춘 상태가 됨
+-- 일관성을 갖춘 데이터파일만이 복구, 이중화 구성이 가능함
+-- 절대주의 : 백업이 종료될 때까지 이 창은 절대 닫으면 안됨. 이 창을 닫는 즉시 백업모드는 종료됨
+
+다른 CMD창으로 마스터db서버를 띄워 데이터파일을 스탠바이db로 전송
+rsync -a $PGDATA/* postgres@172.20.0.101:/var/lib/pgsql/12/data/.
+
+
+스탠바이DB에서 데이터파일 확인
+[postgres@postls02 data]$ ls -rlth
+total 132K
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_serial
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_dynshmem
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_commit_ts
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_twophase
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_tblspc
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_snapshots
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_replslot
+drwx------ 4 postgres postgres 4.0K Feb  5 22:57 pg_multixact
+-rw------- 1 postgres postgres    3 Feb  5 22:57 PG_VERSION
+-rw------- 1 postgres postgres  27K Feb  5 22:57 postgresql.conf
+-rw------- 1 postgres postgres   88 Feb  5 22:57 postgresql.auto.conf
+-rw------- 1 postgres postgres 1.6K Feb  5 22:57 pg_ident.conf
+-rw------- 1 postgres postgres 4.7K Feb  5 22:57 pg_hba.conf
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_xact
+drwx------ 2 postgres postgres 4.0K Feb  5 22:57 pg_subtrans
+drwx------ 5 postgres postgres 4.0K Feb  5 22:57 base
+drwx------ 2 postgres postgres 4.0K Feb  5 22:58 log
+-rw------- 1 postgres postgres   27 Feb  5 23:07 postmaster.opts
+drwx------ 2 postgres postgres 4.0K Feb  5 23:07 pg_notify
+-rw------- 1 postgres postgres   30 Feb  5 23:07 current_logfiles
+-rw------- 1 postgres postgres  102 Feb  5 23:07 postmaster.pid
+drwx------ 2 postgres postgres 4.0K Feb  5 23:07 pg_stat
+drwx------ 2 postgres postgres 4.0K Feb  5 23:08 global
+drwx------ 4 postgres postgres 4.0K Feb  5 23:19 pg_logical
+drwx------ 3 postgres postgres 4.0K Feb  5 23:19 pg_wal
+drwx------ 2 postgres postgres 4.0K Feb  5 23:19 pg_stat_tmp
+[postgres@postls02 data]$
+
+
+백업모드 해제
+postgres=# select pg_stop_backup('f');
+NOTICE:  all required WAL segments have been archived
+                              pg_stop_backup
+---------------------------------------------------------------------------
+ (0/7000050,"START WAL LOCATION: 0/6000028 (file 000000010000000000000006)+
+ CHECKPOINT LOCATION: 0/6000060                                           +
+ BACKUP METHOD: streamed                                                  +
+ BACKUP FROM: master                                                      +
+ START TIME: 2025-02-05 23:29:21 UTC                                      +
+ LABEL: label                                                             +
+ START TIMELINE: 1                                                        +
+ ","")
+(1 row)
+
+postgres=#
+
+
+스탠바이DB 설정
+vi postgresql.conf
+restore_command = 'cp /var/lib/pgsql/12/archive/%f %p'          
+                                # command to use to restore an archived logfile segment
+                                # placeholders: %p = path of file to restore
+                                #               %f = file name only
+                                # e.g. 'cp /mnt/server/archivedir/%f %p'
+                                # (change requires restart)
+archive_cleanup_command = 'pg_archivecleanup /var/lib/pgsql/12/archive/%r'     # command to execute at every restartpoint
+
+standby.signal 파일 생성
+[postgres@postls02 data]$ touch standby.signal
+[postgres@postls02 data]$ ls -rlth | grep standby
+-rw-r--r-- 1 postgres postgres    0 Feb  5 23:33 standby.signal
+
+스탠바이DB 기동
+
+[postgres@postls02 data]$ pg_ctl start
+pg_ctl: another server might be running; trying to start server anyway
+waiting for server to start....2025-02-05 23:33:33.123 UTC [1432] LOG:  starting PostgreSQL 12.22 on aarch64-unknown-linux-gnu, compiled by gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-22), 64-bit
+2025-02-05 23:33:33.125 UTC [1432] LOG:  listening on IPv6 address "::1", port 5432
+2025-02-05 23:33:33.125 UTC [1432] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-02-05 23:33:33.136 UTC [1432] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-02-05 23:33:33.141 UTC [1432] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2025-02-05 23:33:33.164 UTC [1432] LOG:  redirecting log output to logging collector process
+2025-02-05 23:33:33.164 UTC [1432] HINT:  Future log output will appear in directory "log".
+ stopped waiting
+pg_ctl: could not start server
+Examine the log output.
+[postgres@postls02 data]$
+
+
+
