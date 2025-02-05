@@ -9,6 +9,7 @@
   1) Active/Active형식
      - 모든 데이터베이스 노드가 읽기/쓰기 요청을 받아들일 수 있는 이중화 구성
      - 오라클 RAC, MariaDB의 Galera Cluster, Altibase 이중화 구성이 이에 속함
+        PostgreSQL 양방향 논리적 이중화도 Active/Active 지원가능
   2) Active/Standby형식
      - 이중화 클러스터 내의 단 한대의 Active노드(마스터노드)만이 쓰기 요청을 받을 수 있음. 
      - 나머지 노드는 모두 읽기 요청만을 받아들이는 이중화 형식
