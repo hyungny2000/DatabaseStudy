@@ -20,7 +20,7 @@ postgresql-12.22.tar.gz
 # apt-get install gcc build-essential zlib1g-dev libreadline6-dev libicu-dev pkg-config
 
 기타 필요한 패키지
-yum -y install tar
+# yum -y install tar
 
 postgres계정 생성
 # useradd -d /home/postgres postgres
