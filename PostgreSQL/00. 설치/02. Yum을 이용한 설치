@@ -1,5 +1,8 @@
 Yum을 이용한 PostgreSQL 설치
 
+도커 네트워크 생성 (없을 시 생성)
+docker network create --subnet 172.20.0.0/16 mybridge
+
 도커 컨테이너 실행
 docker run -d -it --name postdb01 --hostname postdb01 --net mybridge --ip 172.20.0.2 --privileged oraclelinux:8 /sbin/init
 
