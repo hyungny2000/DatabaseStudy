@@ -1,6 +1,13 @@
 Yum을 이용한 PostgreSQL 설치
 
-PostgreSQL Download : https://www.postgresql.org/download/
+도커 컨테이너 실행
+docker run -d -it --name postdb01 --hostname postdb01 --net mybridge --ip 172.20.0.2 --privileged oraclelinux:8 /sbin/init
+
+도커 컨테이너 접속
+docker exec -it postdb01 /bin/bash
+
+로컬 PC에서 PostgreSQL Download 페이지 접속
+https://www.postgresql.org/download/
 - 각자의 운영체제에 적합한 옵션들을 선택한다.
 - 레드햇 리눅스 8계열의 64비트 설치
 
