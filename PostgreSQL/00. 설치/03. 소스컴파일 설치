@@ -54,6 +54,11 @@ cd contrib
 make
 make install
 
+* 참고 : 소스컴파일 흐름 (거의 이 흐름을 따라간다고 보면 됨)
+   configure : 소스파일을 설치파일로 만들 때 필요한 설정 기재
+   make : configure 결과를 가지고 실행파일 빌드
+   make install : 실행파일을 원하는 위치에 설치
+
 5) 실행파일 소유자를 root->postgres로 변경
 cd /usr
 chown -R postgres:postgres pgsql
