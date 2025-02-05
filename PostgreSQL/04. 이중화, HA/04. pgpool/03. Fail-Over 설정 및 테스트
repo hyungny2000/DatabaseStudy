@@ -168,5 +168,5 @@ Password:
 172.20.0.122 5432 2 0.500000 up up standby primary 0.000000 none none 2025-02-03 03:18:23
 [postgres@pgpool_manager etc]$
 --> 172.20.0.122 (pgpool_db02, 현 마스터DB)상태가 primary임을 확인함.
- --> 172.20.0.121 (pgpool_db01, 구 마스터DB)의 첫번째 down은 DB가 다운된 상태, down상태는 pgpool에서 축출된(dettached) 상태를 나타냄
+ --> 172.20.0.121 (pgpool_db01, 구 마스터DB)의 첫번째 down은 DB가 다운된 상태, down상태는 pgpool에서 축출된(detached) 상태를 나타냄
 
