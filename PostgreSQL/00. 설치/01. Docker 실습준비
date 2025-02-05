@@ -3,6 +3,7 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본지식 및 실습방법
 1. Docker 설치 및 기동
    - 각자의 로컬PC에 맞는 Docker를 설치한다.
    - Windows환경이라면 Docker 설치 후 Docker 프로그램을 실행 먼저 하고, cmd 창을 띄운다. 
+     다음에 이어질 docker 명령은 항상 cmd창에서 실행해야 한다.
 
 2. bridge 네트워크 생성
    - docker network create --subnet 172.20.0.0/16 mybridge
