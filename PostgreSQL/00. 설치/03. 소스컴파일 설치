@@ -29,7 +29,7 @@ postgres계정 생성
 실행파일 빌드
 1) configure
 ./configure --prefix=/usr/pgsql-12
-             (prefix : 설치대상 디렉토리 지정 옵션)
+             (prefix : 설치대상 디렉토리 지정 옵션으로, 원한다면 /PGHOME 이런식으로 변경해도 무방함)
 
 2) make
 make
