@@ -22,6 +22,7 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본지식 및 실습방법
      -oraclelinux:8 : 초기 이미지로 oraclelinux의 8버전 이미지를 사용한다.
                       로컬에 이미지가 없을 경우 docker hub에서 다운받고 로컬에 저장한다.
                       다운받은 다음부터는 로컬에서 이미지를 불러온다.
+     -/sbin/init : 리눅스 기동 시 init프로세스로 기동하겠다는 뜻인 듯
 
 3. docker 컨테이너에 접속한다.
    - docker exec -it postdb01 /bin/bash
