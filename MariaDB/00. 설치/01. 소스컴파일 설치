@@ -1,0 +1,211 @@
+MariaDB 10.6 소스컴파일 설치
+
+도커 컨테이너 생성
+docker run -d -it --name mariadb01 --hostname mariadb01 --net mybridge --ip 172.20.1.2 --privileged oraclelinux:8 /sbin/init
+
+패키지 목록
+https://mariadb.com/kb/en/Build_Environment_Setup_for_Linux/
+
+git
+gzip
+tar
+gcc/g++ 4.8.5 or later, recommend above 9 or clang/clang++
+GNU make 3.75 or later or Ninja
+bison (3.0)
+libncurses
+zlib-dev
+libevent-dev
+cmake above 2.8.7 though preferably above 3.3
+gnutls or openssl
+jemalloc (optional)
+snappy (compression library, optional)
+valgrind (only needed if running mysql-test-run --valgrind)
+libcurl (only needed if you want to use the S3 storage engine)
+libxml2-devel
+boost
+libaio-devel
+systemd-devel
+pcre2-devel (optiona, will be automatically downloaded and installed if not on the system)
+ccache 
+
+설치한 패키지 목록
+yum groupinstall "Development Tools"
+
+필수 패키지 설치여부 조회 명령어
+yum list installed | grep git
+yum list installed | grep gzip
+yum list installed | grep tar
+yum list installed | grep gcc
+yum list installed | grep g++ 
+yum list installed | grep GNU
+yum list installed | grep bison
+yum list installed | grep libncurses
+yum list installed | grep zlib-dev
+yum list installed | grep libevent-dev
+yum list installed | grep cmake
+yum list installed | grep gnutls
+yum list installed | grep jemalloc
+yum list installed | grep snappy 
+yum list installed | grep valgrind
+yum list installed | grep libcurl
+yum list installed | grep libxml2-devel
+yum list installed | grep boost
+yum list installed | grep libaio-devel
+yum list installed | grep systemd-devel
+yum list installed | grep pcre2-devel
+yum list installed | grep ccache 
+
+조회결과
+[root@mariadb01 /]# yum list installed | grep git
+asciidoc.noarch                             8.6.10-0.5.20180627gitf7c2274.el8            @ol8_appstream
+crypto-policies.noarch                      20230731-1.git3177e06.el8                    @System
+crypto-policies-scripts.noarch              20230731-1.git3177e06.el8                    @ol8_baseos_latest
+dracut.aarch64                              049-233.git20240115.0.2.el8                  @ol8_baseos_latest
+git.aarch64                                 2.43.5-2.el8_10                              @ol8_appstream
+git-core.aarch64                            2.43.5-2.el8_10                              @ol8_appstream
+git-core-doc.noarch                         2.43.5-2.el8_10                              @ol8_appstream
+libnsl2.aarch64                             1.2.0-2.20180605git4a062cf.el8               @System
+[root@mariadb01 /]# yum list installed | grep gzip
+gzip.aarch64                                1.9-13.el8_5                                 @System
+[root@mariadb01 /]# yum list installed | grep tar
+tar.aarch64                                 2:1.30-9.el8                                 @System
+[root@mariadb01 /]# yum list installed | grep gcc
+gcc.aarch64                                 8.5.0-22.0.1.el8_10                          @ol8_appstream
+gcc-c++.aarch64                             8.5.0-22.0.1.el8_10                          @ol8_appstream
+gcc-gdb-plugin.aarch64                      8.5.0-22.0.1.el8_10                          @ol8_appstream
+gcc-plugin-annobin.aarch64                  8.5.0-22.0.1.el8_10                          @ol8_appstream
+libgcc.aarch64                              8.5.0-22.0.1.el8_10                          @System
+[root@mariadb01 /]# yum list installed | grep g++
+[root@mariadb01 /]# yum list installed | grep GNU
+[root@mariadb01 /]# yum list installed | grep bison
+bison.aarch64                               3.0.4-10.el8                                 @ol8_appstream
+[root@mariadb01 /]# yum list installed | grep libncurses
+[root@mariadb01 /]# yum list installed | grep zlib-dev
+zlib-devel.aarch64                          1.2.11-25.el8                                @ol8_baseos_latest
+[root@mariadb01 /]# yum list installed | grep libevent-dev
+[root@mariadb01 /]# yum list installed | grep cmake
+[root@mariadb01 /]# yum list installed | grep gnutls
+gnutls.aarch64                              3.6.16-8.el8_9.3                             @System
+[root@mariadb01 /]# yum list installed | grep jemalloc
+[root@mariadb01 /]# yum list installed | grep snappy
+[root@mariadb01 /]# yum list installed | grep valgrind
+valgrind.aarch64                            1:3.22.0-2.el8                               @ol8_appstream
+valgrind-devel.aarch64                      1:3.22.0-2.el8                               @ol8_appstream
+[root@mariadb01 /]# yum list installed | grep libcurl
+libcurl.aarch64                             7.61.1-34.el8_10.2                           @System
+[root@mariadb01 /]# yum list installed | grep libxml2-devel
+[root@mariadb01 /]# yum list installed | grep boost
+boost-atomic.aarch64                        1.66.0-13.el8                                @ol8_appstream
+boost-chrono.aarch64                        1.66.0-13.el8                                @ol8_appstream
+boost-date-time.aarch64                     1.66.0-13.el8                                @ol8_appstream
+boost-filesystem.aarch64                    1.66.0-13.el8                                @ol8_appstream
+boost-regex.aarch64                         1.66.0-13.el8                                @ol8_appstream
+boost-system.aarch64                        1.66.0-13.el8                                @ol8_appstream
+boost-thread.aarch64                        1.66.0-13.el8                                @ol8_appstream
+boost-timer.aarch64                         1.66.0-13.el8                                @ol8_appstream
+[root@mariadb01 /]# yum list installed | grep libaio-devel
+[root@mariadb01 /]# yum list installed | grep systemd-devel
+[root@mariadb01 /]# yum list installed | grep pcre2-devel
+[root@mariadb01 /]# yum list installed | grep ccache
+[root@mariadb01 /]#
+
+설치안된 패키지들
+[root@mariadb01 /]# yum list installed | grep g++
+[root@mariadb01 /]# yum list installed | grep GNU
+[root@mariadb01 /]# yum list installed | grep libncurses
+[root@mariadb01 /]# yum list installed | grep libevent-dev
+[root@mariadb01 /]# yum list installed | grep cmake
+[root@mariadb01 /]# yum list installed | grep jemalloc
+[root@mariadb01 /]# yum list installed | grep snappy
+[root@mariadb01 /]# yum list installed | grep libxml2-devel
+[root@mariadb01 /]# yum list installed | grep libaio-devel
+[root@mariadb01 /]# yum list installed | grep systemd-devel
+[root@mariadb01 /]# yum list installed | grep pcre2-devel
+[root@mariadb01 /]# yum list installed | grep ccache
+
+
+yum -y install g++ -- no
+yum -y install GNU --no
+yum -y install libncurses*
+yum -y install libevent-devel
+yum -y install  cmake
+yum -y install  jemalloc --no
+yum -y install  snappy
+yum -y install  libxml2-devel
+yum -y install  libaio-devel
+yum -y install  systemd-devel
+yum -y install  pcre2-devel
+yum -y install  ccache --no
+yum -y install ncurses-devel
+yum install gnutls-devel
+
+일반적인 소스컴파일 설치법
+https://mariadb.com/kb/en/generic-build-instructions/
+
+
+소스파일을 업로드한다
+
+
+cmake를 이용한 설치법
+
+
+cmake ../server -DCMAKE_INSTALL_PREFIX=/opt/mariadb
+-DCMAKE_INSTALL_PREFIX : 설치 위치
+
+
+-- mariadb 버전을 10.6으로 올리니 잘 되었음.. mariadb버전이 오래되면 cmake와 버전차이가 심해져서 
+   컴파일이 안되나봄
+
+
+이거 수정해서 사용하면 개편할 듯
+cmake ../ \
+
+-DCMAKE_INSTALL_PREFIX=/usr/local/mysql \
+= mysql을 설치할 기본 경로 지정
+-DMYSQL_DATADIR=/usr/local/mysql/data \
+= MySQL 데이터 디렉토리 위치 지정
+-DMYSQL_UNIX_ADDR=/usr/local/mysql/tmp/socket/mysql.socket \
+= 기본은 /tmp/mysql.sock 이며, Unix socket 파일 경로는 서버에 소켓 연결할 때 지정된다.
+-DINSTALL_SYSCONFDIR=/etc \
+= my.cnf 옵션 파일 디렉토리 위치 지정
+-DINSTALL_SYSCONF2DIR=/etc/my.cnf.d \
+= my.cnf 옵션 파일 디렉토리 위치 지정
+-DMYSQL_TCP_PORT=3306 \
+= TCP/IP 연결시 사용하는 포트 번호 지정. 기본 3306.
+-DDEFAULT_CHARSET=utf8 \
+= 언어셋을 utf8로 지정
+-DDEFAULT_COLLATION=utf8_general_ci \
+= 콜레이션을 utf8_general_ci 로 설정.
+-DWITH_EXTRA_CHARSETS=all \
+= all이 기본이며, 모든 문자열 셋을 포함한다는 의미
+-DENABLED_LOCAL_INFILE=1 \
+= MySQL 문법 중에 load data infile이라는 것이 있다. txt 파일 등을 mysql data로 가져오는 문법이라 편리하지만 보안상의 문제가 동시에 발생하기 때문에 1로 지정해준다.
+
+서버에서 스토리지 엔진을 정적으로 컴파일한다면, 아래와 같은 설정들을 할 수 있다.
+-DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+-DWITH_INNOBASE_STORAGE_ENGINE=1 \
+-DWITH_ARIA_STORAGE_ENGINE=1 \
+-DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+-DWITH_FEDERATEDX_STORAGE_ENGINE=1 \
+-DWITH_PARTITION_STORAGE_ENGINE=1 \
+-DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \
+-DWITH_XTRADB_STORAGE_ENGINE=1 \
+-DWITH_MYISAM_STORAGE_ENGINE=1 \
+
+-DWITH_ZLIB=system \
+ system으로 할 경우에 시스템에 설치된 Library를 이용
+-DWITH_READLINE=1 \
+readline 지원여부
+-DWITH_SSL=system \
+MySQL은 SSL 라이브러리를 무조건 사용해야하는데, 특정 옵션(yes, bundled, system)을 정하여 사용한다. MySQL5.7 에서는 bundled가 기본.
+
+
+-- cmake 옵션은 두 개만 했음. 더 많이 해봐야 에러만 뿜뿜함
+cmake ../mariadb-10.6.20 \
+-DCMAKE_INSTALL_PREFIX=/MARIA \
+-DMYSQL_DATADIR=/MARIA_DATA
+
+make : 바이너리파일 생성
+make install : 설치
+
+make && make install
