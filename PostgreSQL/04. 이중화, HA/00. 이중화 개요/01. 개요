@@ -29,4 +29,4 @@
        MaxScale, Pgpool 등의 DB프록시에서 이러한 라우팅을 구현함.
      - Active/Active 환경에선 쓰기부하 분산도 가능함.        
      
-     테스트2
+     테스트23434
