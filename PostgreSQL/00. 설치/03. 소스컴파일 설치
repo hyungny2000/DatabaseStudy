@@ -1,6 +1,10 @@
 소스컴파일 설치
 
+도커 컨테이너 실행
 docker run -d -it --name postdb02 --hostname postdb02 --net mybridge --ip 172.20.0.3 --privileged oraclelinux:8 /sbin/init
+
+컨테이너 접속
+docker exec -it postdb02 /bin/bash
 
 소스파일 다운로드
 https://www.postgresql.org/ftp/source/
