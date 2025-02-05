@@ -1,5 +1,8 @@
 소스컴파일 설치
 
+도커 네트워크 생성 (없을 시 생성)
+docker network create --subnet 172.20.0.0/16 mybridge
+
 도커 컨테이너 실행
 docker run -d -it --name postdb02 --hostname postdb02 --net mybridge --ip 172.20.0.3 --privileged oraclelinux:8 /sbin/init
 
