@@ -113,7 +113,7 @@ repmgr -h 172.20.0.112 -U repmgr -f /var/lib/pgsql/12/repmgr/repmgr.conf standby
 DB기동
 
 스탠바이DB 등록
-repmgr -f /var/lib/pgsql/12/repmgr/repmgr.conf primary register
+repmgr -f /var/lib/pgsql/12/repmgr/repmgr.conf standby register
 
 확인
 [postgres@postrm02 repmgr]$ repmgr -f /var/lib/pgsql/12/repmgr/repmgr.conf cluster show
