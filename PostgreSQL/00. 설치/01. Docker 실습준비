@@ -1,4 +1,4 @@
-PostgreSQL 설치 및 테스트를 위한 Docker 기본지식 및 실습방법
+PostgreSQL 설치 및 테스트를 위한 Docker 기본 명령어
 
 1. Docker 설치 및 기동
    - 각자의 로컬PC에 맞는 Docker를 설치한다.
