@@ -1,0 +1,35 @@
+MariaDB 10.6 Yum 설치
+
+네트워크 설정
+docker network create --subnet 172.20.0.0/16 mybridge
+
+도커 컨테이너 생성
+docker run -d -it --name mariadb01 --hostname mariadb01 --net mybridge --ip 172.20.1.2 -p 3306:3306 --privileged oraclelinux:8 /sbin/init
+
+MariaDB Yum Download 사이트 이동
+https://mariadb.org/download/?t=repo-config&d=Red+Hat+Enterprise+Linux+8&v=10.5&r_m=blendbyte
+
+vi /etc/yum.repos.d/MariaDB.repo
+# MariaDB 10.5 RedHatEnterpriseLinux repository list - created 2025-01-26 22:20 UTC
+# https://mariadb.org/download/
+[mariadb]
+name = MariaDB
+# rpm.mariadb.org is a dynamic mirror if your preferred mirror goes offline. See https://mariadb.org/mirrorbits/ for details.
+# baseurl = https://rpm.mariadb.org/10.5/rhel/$releasever/$basearch
+baseurl = https://tw1.mirror.blendbyte.net/mariadb/yum/10.5/rhel/$releasever/$basearch
+module_hotfixes = 1
+# gpgkey = https://rpm.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgkey = https://tw1.mirror.blendbyte.net/mariadb/yum/RPM-GPG-KEY-MariaDB
+gpgcheck = 1
+
+:wq
+
+MariaDB 패키지 설치
+yum install MariaDB-server MariaDB-client
+
+
+MariaDB 기동
+systemctl start mariadb
+
+MariaDB 정지
+systemctl stop mariadb
