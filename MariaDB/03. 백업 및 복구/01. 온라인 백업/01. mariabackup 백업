@@ -1,0 +1,161 @@
+Mariabackup을 이용한 핫백업
+
+[root@mariadb01 MARIA_DATA]# yum -y install mariadb-backup
+Last metadata expiration check: 0:16:00 ago on Sun Jan 26 23:41:45 2025.
+Dependencies resolved.
+====================================================================================================================================================
+ Package                                Architecture                    Version                               Repository                       Size
+====================================================================================================================================================
+Installing:
+ MariaDB-backup                         aarch64                         10.5.27-1.el8                         mariadb                         6.7 M
+
+Transaction Summary
+====================================================================================================================================================
+Install  1 Package
+
+Total download size: 6.7 M
+Installed size: 28 M
+Downloading Packages:
+MariaDB-backup-10.5.27-1.el8.aarch64.rpm                                                                            3.2 MB/s | 6.7 MB     00:02
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                               3.2 MB/s | 6.7 MB     00:02
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                            1/1
+  Installing       : MariaDB-backup-10.5.27-1.el8.aarch64                                                                                       1/1
+  Running scriptlet: MariaDB-backup-10.5.27-1.el8.aarch64                                                                                       1/1
+  Verifying        : MariaDB-backup-10.5.27-1.el8.aarch64                                                                                       1/1
+
+Installed:
+  MariaDB-backup-10.5.27-1.el8.aarch64
+
+Complete!
+[root@mariadb01 MARIA_DATA]#
+
+[root@mariadb01 MARIA_BACKUP]# mariabackup --backup --target-dir=/MARIA_BACKUP --user=root
+[00] 2025-01-27 00:08:09 Connecting to server host: localhost, user: root, password: not set, port: not set, socket: not set
+[00] 2025-01-27 00:08:09 Using server version 10.5.27-MariaDB
+mariabackup based on MariaDB server 10.5.27-MariaDB Linux (aarch64)
+[00] 2025-01-27 00:08:09 uses posix_fadvise().
+[00] 2025-01-27 00:08:09 cd to /MARIA_DATA/
+[00] 2025-01-27 00:08:09 open files limit requested 0, set to 1048576
+[00] 2025-01-27 00:08:09 mariabackup: using the following InnoDB configuration:
+....
+
+[00] 2025-01-27 00:08:11 Executing BACKUP STAGE END
+[00] 2025-01-27 00:08:11 All tables unlocked
+[00] 2025-01-27 00:08:11 Backup created in directory '/MARIA_BACKUP/'
+[00] 2025-01-27 00:08:11 Writing backup-my.cnf
+[00] 2025-01-27 00:08:11         ...done
+[00] 2025-01-27 00:08:11 Writing xtrabackup_info
+[00] 2025-01-27 00:08:11         ...done
+[00] 2025-01-27 00:08:11 Redo log (from LSN 45163 to 45175) was copied.
+[00] 2025-01-27 00:08:11 completed OK!
+
+[root@mariadb01 MARIA_BACKUP]# ls -rlth
+total 13M
+-rw-r----- 1 root root  12M Jan 27 00:08 ibdata1
+drwx------ 2 root root 4.0K Jan 27 00:08 test
+drwx------ 2 root root 4.0K Jan 27 00:08 mysql
+drwx------ 2 root root 4.0K Jan 27 00:08 performance_schema
+-rw-r----- 1 root root   52 Jan 27 00:08 aria_log_control
+-rw-r----- 1 root root  24K Jan 27 00:08 aria_log.00000001
+-rw-r----- 1 root root   97 Jan 27 00:08 xtrabackup_checkpoints
+-rw-r----- 1 root root 2.5K Jan 27 00:08 ib_logfile0 -- 리두로그 2.5KB
+-rw-r----- 1 root root  285 Jan 27 00:08 backup-my.cnf
+-rw-r----- 1 root root  429 Jan 27 00:08 xtrabackup_info
+
+[root@mariadb01 MARIA_BACKUP]# cat xtrabackup_checkpoints
+backup_type = full-backuped -- 백업 직후의 상태
+from_lsn = 0
+to_lsn = 45163
+last_lsn = 45175
+recover_binlog_info = 0
+
+[root@mariadb01 MARIA_BACKUP]# cat xtrabackup_info
+uuid = cbd07e28-dc42-11ef-9fc1-0242ac140102
+name =
+tool_name = mariabackup
+tool_command = --backup --target-dir=/MARIA_BACKUP --user=root
+tool_version = 10.5.27-MariaDB
+ibbackup_version = 10.5.27-MariaDB
+server_version = 10.5.27-MariaDB
+start_time = 2025-01-27 00:08:09
+end_time = 2025-01-27 00:08:11
+lock_time = 0
+binlog_pos =
+innodb_from_lsn = 0
+innodb_to_lsn = 45163
+partial = N
+incremental = N
+format = file
+compressed = N
+[root@mariadb01 MARIA_BACKUP]#
+
+[root@mariadb01 MARIA_BACKUP]# mariabackup --prepare --target-dir=/MARIA_BACKUP --user=root
+
+mariabackup based on MariaDB server 10.5.27-MariaDB Linux (aarch64)
+[00] 2025-01-27 00:09:47 cd to /MARIA_BACKUP/
+[00] 2025-01-27 00:09:47 open files limit requested 0, set to 1048576
+[00] 2025-01-27 00:09:47 This target seems to be not prepared yet.
+[00] 2025-01-27 00:09:47 mariabackup: using the following InnoDB configuration for recovery:
+[00] 2025-01-27 00:09:47 innodb_data_home_dir = .
+[00] 2025-01-27 00:09:47 innodb_data_file_path = ibdata1:12M:autoextend
+[00] 2025-01-27 00:09:47 innodb_log_group_home_dir = .
+[00] 2025-01-27 00:09:47 InnoDB: Using Linux native AIO
+[00] 2025-01-27 00:09:47 Starting InnoDB instance for recovery.
+[00] 2025-01-27 00:09:47 mariabackup: Using 104857600 bytes for buffer pool (set by --use-memory parameter)
+2025-01-27  0:09:47 0 [Note] InnoDB: Uses event mutexes
+2025-01-27  0:09:47 0 [Note] InnoDB: Compressed tables use zlib 1.2.11
+2025-01-27  0:09:47 0 [Note] InnoDB: Number of pools: 1
+2025-01-27  0:09:47 0 [Note] InnoDB: Using ARMv8 crc32 + pmull instructions
+2025-01-27  0:09:47 0 [Note] InnoDB: Using Linux native AIO
+2025-01-27  0:09:47 0 [Note] InnoDB: Initializing buffer pool, total size = 104857600, chunk size = 104857600
+2025-01-27  0:09:47 0 [Note] InnoDB: Completed initialization of buffer pool
+2025-01-27  0:09:47 0 [Note] InnoDB: Starting crash recovery from checkpoint LSN=45163,45163
+[00] 2025-01-27 00:09:47 Last binlog file , position 0
+[00] 2025-01-27 00:09:47 completed OK!
+
+[root@mariadb01 MARIA_BACKUP]# cat xtrabackup_checkpoints
+backup_type = log-applied -- 리두로그 적용된 상태라고 표시함
+from_lsn = 0
+to_lsn = 45163
+last_lsn = 45175
+recover_binlog_info = 0
+
+[root@mariadb01 MARIA_BACKUP]# cat xtrabackup_info
+uuid = cbd07e28-dc42-11ef-9fc1-0242ac140102
+name =
+tool_name = mariabackup
+tool_command = --backup --target-dir=/MARIA_BACKUP --user=root
+tool_version = 10.5.27-MariaDB
+ibbackup_version = 10.5.27-MariaDB
+server_version = 10.5.27-MariaDB
+start_time = 2025-01-27 00:08:09
+end_time = 2025-01-27 00:08:11
+lock_time = 0
+binlog_pos =
+innodb_from_lsn = 0
+innodb_to_lsn = 45163
+partial = N
+incremental = N
+format = file
+compressed = N
+
+[root@mariadb01 MARIA_BACKUP]# ls -rlth
+total 13M
+drwx------ 2 root root 4.0K Jan 27 00:08 test
+drwx------ 2 root root 4.0K Jan 27 00:08 mysql
+drwx------ 2 root root 4.0K Jan 27 00:08 performance_schema
+-rw-r----- 1 root root   52 Jan 27 00:08 aria_log_control
+-rw-r----- 1 root root  24K Jan 27 00:08 aria_log.00000001
+-rw-r----- 1 root root  285 Jan 27 00:08 backup-my.cnf
+-rw-r----- 1 root root  429 Jan 27 00:08 xtrabackup_info
+-rw-r----- 1 root root  12M Jan 27 00:09 ibdata1
+-rw-r--r-- 1 root root    3 Jan 27 00:09 xtrabackup_binlog_pos_innodb
+-rw-r----- 1 root root    0 Jan 27 00:09 ib_logfile0 -- 2.5KB에서 0bytes로 용량 줄어듬
+-rw-r----- 1 root root   95 Jan 27 00:09 xtrabackup_checkpoints
+[root@mariadb01 MARIA_BACKUP]#
