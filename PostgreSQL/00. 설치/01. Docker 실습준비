@@ -21,7 +21,7 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본 명령어
 2. bridge 네트워크 생성
    - docker network create --subnet 172.20.0.0/16 mybridge
 
-2. Docker run 명령어로 PostgreSQL을 설치할 리눅스 컨테이너를 생성한다.
+3. Docker run 명령어로 PostgreSQL을 설치할 리눅스 컨테이너를 생성한다.
    - docker run -d -it --name postdb01 --hostname postdb01 --net mybridge --ip 172.20.0.110 --privileged -p 5432:5432 oraclelinux:8 /sbin/init
      -d : 백그라운드 모드로 docker 컨테이너 실행
      -it : i는 interactive의 의미로 지속적으로 명령을 받고 실행하는 모드
@@ -37,15 +37,15 @@ PostgreSQL 설치 및 테스트를 위한 Docker 기본 명령어
                       다운받은 다음부터는 로컬에서 이미지를 불러온다.
      -/sbin/init : 리눅스 기동 시 init프로세스로 기동하겠다는 뜻인 듯
 
-3. docker 컨테이너에 접속한다.
+4. docker 컨테이너에 접속한다.
    - docker exec -it postdb01 /bin/bash
      - exec : 컨테이너에 명령 실행
      -it : ssh모드로 상호작용하기 위한 모드
      -/bin/bash : exec로 실행할 명령어 (bash셀 실행)
 
-4. docker 컨테이너 종료
+5. docker 컨테이너 종료
    - docker stop postdb01
 
-5. docker 컨테이너 시작
+6. docker 컨테이너 시작
    - docker start postdb01
     
