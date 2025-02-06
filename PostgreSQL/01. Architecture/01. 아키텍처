@@ -18,7 +18,7 @@
    1) 커밋 로그. 트랜잭션 커밋 정보를 보관
 
 4. Work Mem
-   1) 백엔드 프로세스에서 사용하는 Sorting, Hashing 영역
+   1) 백엔드 프로세스에서 사용하는 Sorting, Hashing시의 작업영역
 
 5. Maintenance_Work_Mem
    1) Vacuum, rebuild index, analyze 등 유지보수에 사용되는 메모리 영역
