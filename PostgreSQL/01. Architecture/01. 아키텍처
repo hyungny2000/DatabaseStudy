@@ -10,7 +10,6 @@
    * Free Buffer  : Dirty Buffer는 주기적으로 디스크와 동기화시켜주어야 하는데 이를 체크포인트(checkpoint)라고 한다.
                     체크포인트가 끝난 Dirty Buffer는 변경내용이 이미 디스크에 있으므로 다른 DB세션에 의해 재사용될 수 있는데
                     이 상태를 Free하다고 한다.
-   
 
 2. WAL Buffer
    1) WAL(Write Ahead Log)란, Insert/Update/Delete/Alter 등의 DB데이터/구조변경을 실행하기 전에
