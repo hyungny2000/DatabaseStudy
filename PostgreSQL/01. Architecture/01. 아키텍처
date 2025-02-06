@@ -46,11 +46,10 @@
 5. checkpoint
    Writer에 신호를 보내서 Shared Buffer에 있는 Dirty Buffer를 디스크로 내리게 함
    발생주기
-   1) 커밋 시
-   2) pg_start_backup 수행 또는 pg_basebackup 백업 시
-   3) DB를 정상종료할 때.
-   4) checkpoint 명령 실행시
-   5) 아무 이벤트가 없어도 5초마다 한 번 (기본값)
+   1) pg_start_backup 수행 또는 pg_basebackup 백업 시
+   2) DB를 정상종료할 때.
+   3) checkpoint 명령 실행시
+   4) 아무 이벤트가 없어도 5초마다 한 번 (기본값)
 
 6. archiver
    archive_mode=on 설정 시 기동하는 선택적 프로세스
