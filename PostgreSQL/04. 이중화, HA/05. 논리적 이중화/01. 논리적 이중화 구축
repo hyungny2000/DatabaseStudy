@@ -1,7 +1,9 @@
 논리적 이중화
 docker run -d -it --name postlr01 --hostname postlr01 --net mybridge --ip 172.20.0.115 --privileged oraclelinux:8 /sbin/init
-
 docker run -d -it --name postlr02 --hostname postlr02 --net mybridge --ip 172.20.0.116 --privileged oraclelinux:8 /sbin/init
+
+docker exec -it postlr01 /bin/bash
+docker exec -it postlr02 /bin/bash
 
 양 쪽에 DB, 테이블 생성
 
