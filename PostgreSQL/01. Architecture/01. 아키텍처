@@ -3,9 +3,12 @@
    1) 조회/변경에 필요한 데이터 블록을 보관하는 메모리 영역
    2) 크기는 기본값 기준 128MB (필요에 따라 조절 가능)
    3) 거의 모든 SQL은 수행 시 데이터를 Shared Buffer에 Fetch한 다음 조회/변경해야 함.
-   * Dirty Buffer : Shared Buffer에서 변경된 데이터는 커밋될 때까지 디스크에 있을 때와는 다른 데이터를 
+   * Dirty Buffer : Shared Buffer에서 변경된 데이터는 한동안 디스크에 있을 때와는 다른 데이터를 
                     지니게 되는데, 이렇게 디스크와 메모리에 있는 데이터가 서로 다른 상태를 더티(Dirty)하다고 하며
                     이런 상태의 버퍼를 Dirty Buffer라고 한다.
+                    Dirty Buffer는 주기적으로 디스크와 동기화시켜주어야 하는데 이를 체크포인트(checkpoint)라고 한다.
+                    체크포인트가 끝난 Dirty Buffer는 변경내용이 이미 디스크에 있으므로 다른 DB세션에 의해 재사용될 수 있는데
+                    이 상태를 Free하다고 한다.
 
 2. WAL Buffer
    1) WAL(Write Ahead Log)란, Insert/Update/Delete/Alter 등의 DB데이터/구조변경을 실행하기 전에
