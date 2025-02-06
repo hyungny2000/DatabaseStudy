@@ -12,7 +12,7 @@
 
 2. WAL Buffer
    1) WAL(Write Ahead Log)란, Insert/Update/Delete/Alter 등의 DB데이터/구조변경을 실행하기 전에
-      변경이력을 기록한 로그를 말한다. WAL로그를 가장 먼저 적재하는 메모리영역이 WAL Buffer이다.
+      변경이력을 기록한 로그를 말한다. WAL로그가 가장 먼저 적재되는 메모리영역이 WAL Buffer이다.
 
 3. CLog
    1) 커밋 로그. 트랜잭션 커밋 정보를 보관
