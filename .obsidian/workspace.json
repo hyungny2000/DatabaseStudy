@@ -1,0 +1,178 @@
+{
+  "main": {
+    "id": "f91078e599155a55",
+    "type": "split",
+    "children": [
+      {
+        "id": "e1562913c1c29b95",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b80f42ae0a1b5b5f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "PostgreSQL/04. 이중화, HA/03. repmgr/11. repmgr 이중화 모니터링.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "11. repmgr 이중화 모니터링"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f7236fe50c06d051",
+    "type": "split",
+    "children": [
+      {
+        "id": "7bdda3f18eda65e8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "456c8f06dec46a23",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "파일 탐색기"
+            }
+          },
+          {
+            "id": "b953e9c9f1ea941a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "검색"
+            }
+          },
+          {
+            "id": "8fe24b0d76faeee5",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "북마크"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6a346ce903a5a36b",
+    "type": "split",
+    "children": [
+      {
+        "id": "6d8ca330add6a8f9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a1eb8f93f22e1bba",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "PostgreSQL/04. 이중화, HA/03. repmgr/11. repmgr 이중화 모니터링.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "11. repmgr 이중화 모니터링 의 백링크"
+            }
+          },
+          {
+            "id": "b04ebcdf9602c1b2",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "PostgreSQL/04. 이중화, HA/03. repmgr/11. repmgr 이중화 모니터링.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "11. repmgr 이중화 모니터링 의 나가는 링크"
+            }
+          },
+          {
+            "id": "3a142bbb827b1bb1",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "태그"
+            }
+          },
+          {
+            "id": "801042bb01cda0ef",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "PostgreSQL/04. 이중화, HA/03. repmgr/11. repmgr 이중화 모니터링.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "11. repmgr 이중화 모니터링 의 개요"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false
+    }
+  },
+  "active": "b80f42ae0a1b5b5f",
+  "lastOpenFiles": [
+    "PostgreSQL/04. 이중화, HA/03. repmgr/00. repmgr 확장 개요.md",
+    "PostgreSQL/00. 설치/03. 소스컴파일 설치.md",
+    "PostgreSQL/00. 설치/02. Yum을 이용한 설치.md",
+    "PostgreSQL/00. 설치/01. Docker 실습준비.md"
+  ]
+}
