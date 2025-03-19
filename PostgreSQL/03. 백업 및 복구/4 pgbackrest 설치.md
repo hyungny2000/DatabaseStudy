@@ -122,66 +122,8 @@ pg1-path=/var/lib/postgresql/15/main
 
 [global] 
 repo1-path=/var/lib/pgbackrest 
-repo1-retention-full=2 
-log-level-console=info
-```
+repo1-ret조  
+https://pgbackrest.org/user-guide.html#installation
 
-**3\. **PostgreSQL WAL 아카이빙 설정 파일 수정****
 
-/etc/postgresql/15/main/postgresql.conf
 
-```
- postgres@lkmpg:~$ cat /etc/postgresql/15/main/postgresql.conf | grep command 
-  
-  
-  # Any parameter can also be given as a command-line option to the server, e.g., 
-  # with the "SET" SQL command. 
-  # The default values of these variables are driven from the -D command-line 
-  #ssl_passphrase_command = '' 
-  #ssl_passphrase_command_supports_reload = off 
-  # (empty string indicates archive_command should #archive_command = '' 
-  # command to use to archive a logfile segment
-  #restore_command = '' 
-  # command to use to restore an archived logfile segment #archive_cleanup_command = '' 
-  # command to execute at every restartpoint #recovery_end_command = '' 
-  # command to execute at completion of recovery 
-  # %i = command tag #log_replication_commands = off 
-  #archive_command = '/usr/local/bin/wal-g wal-push %p --config=/etc/wal-g.yaml' 
-  
-  archive_command = 'pgbackrest --stanza=demo archive-push %p' 
-  
-  #restore_command = '/usr/local/bin/wal-g wal-fetch %f %p --config=/etc/wal-g.yaml'
-```
-
-**4. **PostgreSQL 재기동****
-
-**5. stanza 초기화작업**
-
-```
-postgres@lkmpg:~$ sudo -u postgres pgbackrest --stanza=demo stanza-create 
-
-2025-03-15 12:26:38.812 P00 INFO: stanza-create command begin 2.54.2: --exec-id=1420-cbcc50f3 --log-level-console=info -- pg1-path=/var/lib/postgresql/15/main --repo1-path=/var/lib/pgbackrest --stanza=demo 
-2025-03-15 12:26:38.880 P00 INFO: stanza-create for stanza 'demo' on repo1 
-2025-03-15 12:26:38.887 P00 INFO: stanza-create command end: completed successfully (81ms)
-```
-
-**6. stanza check**
-
-```
-postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres pgbackrest --stanza=demo --log-level-console=info check 
-
-2025-03-15 12:33:06.833 P00 INFO: check command begin 2.54.2: --exec-id=1472-cf6c746d --log-level-console=info --pg1-path=/var/lib/postgresql/15/main --repo1-path=/var/lib/pgbackrest --stanza=demo 
-2025-03-15 12:33:06.845 P00 INFO: check repo1 configuration (primary) 
-2025-03-15 12:33:06.906 P00 INFO: check repo1 archive for WAL (primary) 
-2025-03-15 12:33:07.208 P00 INFO: WAL segment 000000050000000000000011 successfully archived to '/var/lib/pgbackrest/archive/demo/15-1/0000000500000000/000000050000000000000011-fc3f218f07125da170b6185e5e7fab439e2ec54b.gz' on repo1 
-2025-03-15 12:33:07.208 P00 INFO: check command end: completed successfully (378ms)
-```
-
-  
-[https://pgbackrest.org/user-guide.html#installation](https://pgbackrest.org/user-guide.html#installation)
-
- [pgBackRest User Guide - Debian & Ubuntu
-
-The pgBackRest User Guide demonstrates how to quickly and easily setup pgBackRest for your PostgreSQL database. Step-by-step instructions lead the user through all the important features of the fastest, most reliable PostgreSQL backup and restore solution.
-
-pgbackrest.org](https://pgbackrest.org/user-guide.html#installation)
