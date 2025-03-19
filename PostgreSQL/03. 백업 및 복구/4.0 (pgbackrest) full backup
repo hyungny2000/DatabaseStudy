@@ -1,0 +1,115 @@
+## 백업 확인
+
+-   현재는 backup 본이 없는 상태
+-   `postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres pgbackrest info stanza: demo status: error (no valid backups) cipher: none db (current) wal archive min/max (15): 000000050000000000000010/000000050000000000000011`
+
+## 테스트를 위해 데이터 생성
+
+```
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres psql -c "CREATE DATABASE testdb;"
+sudo -u postgres psql -d testdb -c "CREATE TABLE test_table (id SERIAL, data TEXT);"
+sudo -u postgres psql -d testdb -c "INSERT INTO test_table (data) VALUES ('Full Backup Test');"
+CREATE DATABASE
+CREATE TABLE
+INSERT 0 1
+```
+
+## fullbackup 실행
+
+```
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres pgbackrest --stanza=demo --type=full backup
+2025-03-15 12:38:33.421 P00   INFO: backup command begin 2.54.2: --exec-id=1522-16093f5e --log-level-console=info --pg1-path=/var/lib/postgresql/15/main --repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=demo --type=full
+2025-03-15 12:38:33.479 P00   INFO: execute non-exclusive backup start: backup begins after the next regular checkpoint completes
+2025-03-15 12:40:07.449 P00   INFO: backup start archive = 000000050000000000000014, lsn = 0/14000028
+2025-03-15 12:40:07.449 P00   INFO: check archive for segment 000000050000000000000014
+2025-03-15 12:40:14.321 P00   INFO: execute non-exclusive backup stop and wait for all WAL segments to archive
+2025-03-15 12:40:14.342 P00   INFO: backup stop archive = 000000050000000000000015, lsn = 0/15000088
+2025-03-15 12:40:14.346 P00   INFO: check archive for segment(s) 000000050000000000000014:000000050000000000000015
+2025-03-15 12:40:14.665 P00   INFO: new backup label = 20250315-123833F
+2025-03-15 12:40:14.741 P00   INFO: full backup size = 68.6MB, file total = 1570
+2025-03-15 12:40:14.741 P00   INFO: backup command end: completed successfully (101323ms)
+2025-03-15 12:40:14.741 P00   INFO: expire command begin 2.54.2: --exec-id=1522-16093f5e --log-level-console=info --repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=demo
+2025-03-15 12:40:14.742 P00   INFO: expire command end: completed successfully (1ms)
+```
+
+## backup list 확인
+
+```
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres pgbackrest info
+stanza: demo
+    status: ok
+    cipher: none
+
+    db (current)
+        wal archive min/max (15): 000000050000000000000010/000000050000000000000015
+
+        full backup: 20250315-123833F
+            timestamp start/stop: 2025-03-15 12:38:33+09 / 2025-03-15 12:40:14+09
+            wal start/stop: 000000050000000000000014 / 000000050000000000000015
+            database size: 68.6MB, database backup size: 68.6MB
+            repo1: backup set size: 4.9MB, backup size: 4.9MB
+```
+
+## data 손실 발생
+
+-   강제로 table drop
+    
+    ```
+    postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ psql testdb
+    psql (15.12 (Ubuntu 15.12-1.pgdg24.04+1))
+    Type "help" for help.
+    testdb=# \t
+    Tuples only is on.
+    testdb=# \d
+    public | test_table        | table    | postgres
+    public | test_table_id_seq | sequence | postgres
+    ```
+    
+
+testdb=# \\q  
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ sudo -u postgres psql -d testdb -c "DROP TABLE test\_table;"  
+sudo systemctl stop postgresql  
+sudo rm -rf /var/lib/postgresql/15/main/\*  
+DROP TABLE  
+rm: cannot remove '/var/lib/postgresql/15/main/pg\_wal': Directory not empty  
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$  
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ rm -rf /var/lib/postgresql/15/main/^C  
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ ps -ef | grep postgre  
+root 1363 1351 0 12:24 pts/0 00:00:00 su - postgres  
+postgres 1364 1363 0 12:24 pts/0 00:00:00 -bash  
+root 1656 1602 0 12:39 pts/2 00:00:00 su - postgres  
+postgres 1657 1656 0 12:39 pts/2 00:00:00 -bash  
+postgres 1708 1364 0 12:43 pts/0 00:00:00 ps -ef  
+postgres 1709 1364 0 12:43 pts/0 00:00:00 grep postgre  
+postgres@lkmpg:/var/lib/pgbackrest/archive/demo$ rm -rf /var/lib/postgresql/15/main/
+
+````
+
+## fullbackup 복구
+
+```shell
+postgres@lkmpg:~$ sudo -u postgres pgbackrest --stanza=demo restore
+2025-03-15 12:51:19.295 P00   INFO: restore command begin 2.54.2: --exec-id=1351-11764dc5 --log-level-console=info --pg1-path=/var/lib/postgresql/15/main --repo1-path=/var/lib/pgbackrest --stanza=demo
+2025-03-15 12:51:19.302 P00   INFO: repo1: restore backup set 20250315-123833F, recovery will start at 2025-03-15 12:38:33
+2025-03-15 12:51:21.319 P00   INFO: write updated /var/lib/postgresql/15/main/postgresql.auto.conf
+2025-03-15 12:51:21.323 P00   INFO: restore global/pg_control (performed last to ensure aborted restores cannot be started)
+2025-03-15 12:51:21.324 P00   INFO: restore size = 68.6MB, file total = 1570
+2025-03-15 12:51:21.324 P00   INFO: restore command end: completed successfully (2030ms)
+````
+
+## 복구 후 데이터 재생성 확인
+
+```
+postgres@lkmpg:~$ sudo systemctl start postgresql
+postgres@lkmpg:~$ psql testdb
+psql (15.12 (Ubuntu 15.12-1.pgdg24.04+1))
+Type "help" for help.
+
+testdb=# \d
+                List of relations
+ Schema |       Name        |   Type   |  Owner
+--------+-------------------+----------+----------
+ public | test_table        | table    | postgres
+ public | test_table_id_seq | sequence | postgres
+(2 rows)
+```
