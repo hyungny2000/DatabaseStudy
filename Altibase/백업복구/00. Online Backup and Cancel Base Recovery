@@ -1,0 +1,434 @@
+복구에 필요한 정보 확인
+
+DB_NAME       =  mydb   -- DB명
+
+MEM_DB_DIR          = /alti_mem_dbs0 # Memory DB Directory
+DEFAULT_DISK_DB_DIR = /alti_disk_dbs # Disk   DB Directory
+
+LOGANCHOR_DIR       = /alti_disk_dbs # LOGANCHOR_DIR1     
+LOGANCHOR_DIR       = /alti_mem_dbs0 # LOGANCHOR_DIR2
+LOGANCHOR_DIR       = /alti_logs # LOGANCHOR_DIR3
+
+[altibase@vbox alti_back]$ dumpla loganchor0
+*****************************************************************
+     Altibase A+ Edition.
+     This software is for non-commercial use only.
+*****************************************************************
+-----------------------------------------------------------------
+     Altibase Client Dump LogAnchor utility.
+     Release Version 7.3.0.0.7
+     Copyright 2000, ALTIBASE Corporation or its subsidiaries.
+     All Rights Reserved.
+-----------------------------------------------------------------
+<< DUMP OF LOGANCHOR FILE - loganchor0 >>
+
+
+------------------------
+[LOGANCHOR ATTRIBUTE SIZE
+Loganchor Static Area                [ 1712 ]
+Tablespace Attribute                 [ 600 ]
+Checkpoint Path Attribute            [ 520 ]
+Checkpoint Image Attribute           [ 36 ]
+Disk Datafile Attribute              [ 592 ]
+
+------------------------
+[LOGANCHOR HEADER]
+Binary DB Version                    [ 7.3.0 ]
+Archivelog Mode                      [ Archivelog ]
+Transaction Segment Entry Count      [ 256 ]
+Begin Checkpoint LSN                 [ 0, 3119032 ]
+End Checkpoint LSN                   [ 0, 3119146 ]
+Disk Redo LSN                        [ 0, 3119032 ]
+LSN for Recovery from Replication    [ NULL ]
+Server Status                        [ SERVER STARTED ]
+End LSN                              [ 0, 3119032 ]
+Media Recovery LSN                   [ 0, 3119032 ]
+ResetLog LSN                         [ 4294967295, 4294967295 ]
+Last Created Logfile Num             [ 5 ]
+Delete Logfile(s) Range              [ 0 ~ 0 ]
+Update And Flush Count               [ 124 ]
+New Tablespace ID                    [ 5 ]
+
+[ Change Tracking ATTRIBUTE ]
+Last Flush LSN                       [ 0, 0 ]
+Change Tracking Manager State        [ CHANGE TRACKING MGR DISABLED ]
+Change Tracking File Name            [  ]
+
+[ Backup Info ATTRIBUTE ]
+Delete Archivelog File Range         [ Not Applicable ]
+Last Backup LSN                      [ 0, 0 ]
+Before Backup LSN                    [ 0, 0 ]
+Backup Info Manager State            [ BACKUP INFO FILE REMOVED ]
+Backup Directory Path                [  ]
+Backup Info File Name                [  ]
+
+-----------------------
+[ TABLESPACE ATTRIBUTE ]
+Tablespace ID                        [ 0 ]
+Tablespace Name                      [ SYS_TBS_MEM_DIC ]
+New Database File ID                 [ 0 ]
+Extent Management                    [ FREE EXTENT BITMAP TABLESPACE ]
+Tablespace Status                    [ ONLINE ]
+TableSpace Type                      [ 0 ]
+Checkpoint Path Count                [ 0 ]
+Autoextend Mode                      [ Autoextend ]
+Shared Memory Key                    [ 0 ]
+Stable Checkpoint Image Num.         [ 1 ]
+Init Size                            [        4 MBytes (        129 Pages ) ]
+Next Size                            [        4 MBytes (        128 Pages ) ]
+Maximum Size                         [ 134217727 MBytes ( 4294967295 Pages ) ]
+Split File Size                      [     1024 MBytes (      32768 Pages ) ]
+
+
+[ MEMORY CHECKPOINT PATH ATTRIBUTE ]
+Tablespace ID                        [ 0 ]
+Checkpoint Path                      [ /alti_mem_dbs0 ]
+[ MEMORY CHECKPOINT IMAGE ATTRIBUTE ]
+Tablespace ID                        [ 0 ]
+File Number                          [ 0 ]
+Create LSN                           [ 0, 555 ]
+Create On Disk (PingPong 0)          [ Created ]
+Create On Disk (PingPong 1)          [ Created ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+
+-----------------------
+[ TABLESPACE ATTRIBUTE ]
+Tablespace ID                        [ 1 ]
+Tablespace Name                      [ SYS_TBS_MEM_DATA ]
+New Database File ID                 [ 0 ]
+Extent Management                    [ FREE EXTENT BITMAP TABLESPACE ]
+Tablespace Status                    [ ONLINE ]
+TableSpace Type                      [ 1 ]
+Checkpoint Path Count                [ 0 ]
+Autoextend Mode                      [ Autoextend ]
+Shared Memory Key                    [ 0 ]
+Stable Checkpoint Image Num.         [ 1 ]
+Init Size                            [        8 MBytes (        257 Pages ) ]
+Next Size                            [        4 MBytes (        128 Pages ) ]
+Maximum Size                         [ 134217727 MBytes ( 4294967295 Pages ) ]
+Split File Size                      [     1024 MBytes (      32768 Pages ) ]
+
+
+[ MEMORY CHECKPOINT PATH ATTRIBUTE ]
+Tablespace ID                        [ 1 ]
+Checkpoint Path                      [ /alti_mem_dbs0 ]
+[ MEMORY CHECKPOINT IMAGE ATTRIBUTE ]
+Tablespace ID                        [ 1 ]
+File Number                          [ 0 ]
+Create LSN                           [ 0, 1494 ]
+Create On Disk (PingPong 0)          [ Created ]
+Create On Disk (PingPong 1)          [ Created ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+
+-----------------------
+[ TABLESPACE ATTRIBUTE ]
+Tablespace ID                        [ 2 ]
+Tablespace Name                      [ SYS_TBS_DISK_DATA ]
+New Database File ID                 [ 1 ]
+Extent Management                    [ FREE EXTENT BITMAP TABLESPACE ]
+Tablespace Status                    [ ONLINE ]
+TableSpace Type                      [ 3 ]
+
+
+[ DISK DATABASE FILE ATTRIBUTE ]
+Tablespace ID                        [ 2 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/system001.dbf ]
+Create LSN                           [ 0, 2164 ]
+Database File Status                 [ ONLINE ]
+Autoextend Mode                      [ Autoextend ]
+Create Mode                          [ 1 ]
+Initialize Size                      [      100 MBytes (      12800 Pages ) ]
+Current Size                         [      100 MBytes (      12800 Pages ) ]
+Next Size                            [        1 MBytes (        128 Pages ) ]
+Maximum Size                         [     2047 MBytes (     262143 Pages ) ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+
+-----------------------
+[ TABLESPACE ATTRIBUTE ]
+Tablespace ID                        [ 3 ]
+Tablespace Name                      [ SYS_TBS_DISK_UNDO ]
+New Database File ID                 [ 1 ]
+Extent Management                    [ FREE EXTENT BITMAP TABLESPACE ]
+Tablespace Status                    [ ONLINE ]
+TableSpace Type                      [ 7 ]
+
+
+[ DISK DATABASE FILE ATTRIBUTE ]
+Tablespace ID                        [ 3 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/undo001.dbf ]
+Create LSN                           [ 0, 2937 ]
+Database File Status                 [ ONLINE ]
+Autoextend Mode                      [ Autoextend ]
+Create Mode                          [ 1 ]
+Initialize Size                      [      100 MBytes (      12800 Pages ) ]
+Current Size                         [      129 MBytes (      16512 Pages ) ]
+Next Size                            [        1 MBytes (        128 Pages ) ]
+Maximum Size                         [     2047 MBytes (     262143 Pages ) ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+
+-----------------------
+[ TABLESPACE ATTRIBUTE ]
+Tablespace ID                        [ 4 ]
+Tablespace Name                      [ SYS_TBS_DISK_TEMP ]
+New Database File ID                 [ 1 ]
+Extent Management                    [ FREE EXTENT BITMAP TABLESPACE ]
+Tablespace Status                    [ ONLINE ]
+TableSpace Type                      [ 5 ]
+
+
+[ DISK DATABASE FILE ATTRIBUTE ]
+Tablespace ID                        [ 4 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/temp001.dbf ]
+Create LSN                           [ 0, 261249 ]
+Database File Status                 [ ONLINE ]
+Autoextend Mode                      [ Autoextend ]
+Create Mode                          [ 1 ]
+Initialize Size                      [      100 MBytes (      12800 Pages ) ]
+Current Size                         [      100 MBytes (      12800 Pages ) ]
+Next Size                            [        1 MBytes (        128 Pages ) ]
+Maximum Size                         [     2047 MBytes (     262143 Pages ) ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+
+END OF LOGANCHOR
+[altibase@vbox alti_back]$
+
+
+[altibase@vbox alti_back]$ dumpla loganchor0 | grep File
+Change Tracking File Name            [  ]
+Delete Archivelog File Range         [ Not Applicable ]
+Backup Info File Name                [  ]
+New Database File ID                 [ 0 ]
+Split File Size                      [     1024 MBytes (      32768 Pages ) ]
+File Number                          [ 0 ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+New Database File ID                 [ 0 ]
+Split File Size                      [     1024 MBytes (      32768 Pages ) ]
+File Number                          [ 0 ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+New Database File ID                 [ 1 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/system001.dbf ]
+Database File Status                 [ ONLINE ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+New Database File ID                 [ 1 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/undo001.dbf ]
+Database File Status                 [ ONLINE ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+New Database File ID                 [ 1 ]
+Database File ID                     [ 0 ]
+Database File Path                   [ /alti_disk_dbs/temp001.dbf ]
+Database File Status                 [ ONLINE ]
+ChangeTracking DataFileDescSlot ID   [ 4294967295, 4294967295 ]
+[altibase@vbox alti_back]$
+
+
+
+-rw-r-----. 1 altibase altibase 5.1M  6월 15 19:47 SYS_TBS_MEM_DIC-1-0
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor2
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor1
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor0
+-rw-r-----. 1 altibase altibase 8.1M  6월 15 19:47 SYS_TBS_MEM_DATA-1-0
+-rw-r-----. 1 altibase altibase 101M  6월 15 19:47 system001.dbf
+-rw-r-----. 1 altibase altibase 130M  6월 15 19:47 undo001.dbf
+[altibase@vbox alti_back]$ mv loganchor0 /alti_disk_dbs/.
+[altibase@vbox alti_back]$ mv loganchor1 /alti_mem_dbs0/.
+[altibase@vbox alti_back]$ mv loganchor2 /alti_logs/.
+[altibase@vbox alti_back]$ ls -rlth
+합계 243M
+-rw-r-----. 1 altibase altibase 5.1M  6월 15 19:47 SYS_TBS_MEM_DIC-1-0
+-rw-r-----. 1 altibase altibase 8.1M  6월 15 19:47 SYS_TBS_MEM_DATA-1-0
+-rw-r-----. 1 altibase altibase 101M  6월 15 19:47 system001.dbf
+-rw-r-----. 1 altibase altibase 130M  6월 15 19:47 undo001.dbf
+[altibase@vbox alti_back]$ cd /alti_logs
+[altibase@vbox alti_logs]$ ls -rlth
+합계 8.0K
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor2
+[altibase@vbox alti_logs]$ cd /alti_back
+[altibase@vbox alti_back]$ ls -rlth
+합계 243M
+-rw-r-----. 1 altibase altibase 5.1M  6월 15 19:47 SYS_TBS_MEM_DIC-1-0
+-rw-r-----. 1 altibase altibase 8.1M  6월 15 19:47 SYS_TBS_MEM_DATA-1-0
+-rw-r-----. 1 altibase altibase 101M  6월 15 19:47 system001.dbf
+-rw-r-----. 1 altibase altibase 130M  6월 15 19:47 undo001.dbf
+[altibase@vbox alti_back]$ mv *.dbf /alti_disk_dbs/.
+[altibase@vbox alti_back]$ ls -rlth
+합계 14M
+-rw-r-----. 1 altibase altibase 5.1M  6월 15 19:47 SYS_TBS_MEM_DIC-1-0
+-rw-r-----. 1 altibase altibase 8.1M  6월 15 19:47 SYS_TBS_MEM_DATA-1-0
+[altibase@vbox alti_back]$ mv * /alti_mem_dbs0/.
+[altibase@vbox alti_back]$ ls -rlth
+합계 0
+[altibase@vbox alti_back]$ cd /alti_mem_dbs0
+[altibase@vbox alti_mem_dbs0]$ ls -rlth
+합계 14M
+-rw-r-----. 1 altibase altibase 5.1M  6월 15 19:47 SYS_TBS_MEM_DIC-1-0
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor1
+-rw-r-----. 1 altibase altibase 8.1M  6월 15 19:47 SYS_TBS_MEM_DATA-1-0
+[altibase@vbox alti_mem_dbs0]$ cd /alti_disk_dbs
+[altibase@vbox alti_disk_dbs]$ ls -rlth
+합계 230M
+-rw-r-----. 1 altibase altibase 7.5K  6월 15 19:47 loganchor0
+-rw-r-----. 1 altibase altibase 101M  6월 15 19:47 system001.dbf
+-rw-r-----. 1 altibase altibase 130M  6월 15 19:47 undo001.dbf
+[altibase@vbox alti_disk_dbs]$
+
+
+
+
+
+[altibase@vbox alti_disk_dbs]$ is -sysdba -- sysdba 권한으로 접속
+*****************************************************************
+     Altibase A+ Edition.
+     This software is for non-commercial use only.
+*****************************************************************
+-----------------------------------------------------------------
+     Altibase Client Query utility.
+     Release Version 7.3.0.0.7
+     Copyright 2000, ALTIBASE Corporation or its subsidiaries.
+     All Rights Reserved.
+-----------------------------------------------------------------
+ISQL_CONNECTION = UNIX, SERVER = localhost
+Connected to idle instance.
+iSQL(sysdba)> startup control;
+Connecting to the DB server... Connected.
+
+
+TRANSITION TO PHASE : PROCESS
+
+
+TRANSITION TO PHASE : CONTROL
+Command executed successfully.
+iSQL(sysdba)> alter database create datafile 'temp001.dbf'; -- temp테이블스페이스는 백업을 안하므로 새로 생성해야 함.
+Alter success.
+iSQL(sysdba)>
+iSQL(sysdba)> alter database recover database until cancel;
+  [ RECMGR ] Checking database consistency..
+             Memory Redo LSN <0,3119032> - <4294967295,4294967295>
+             Disk Redo LSN <0,3119032> - <4294967295,4294967295>
+             Total 4 database file(s)
+             Memory 2 Checkpoint Image(s)
+             Disk 2 Database File(s)
+  [ RECMGR ] Restoring corrupted memory tablespace checkpoint images
+  [ RECMGR ] Loading memory tablespace checkpoint images from backup media
+  [ RECMGR ] Restoring database consistency
+             Suggestion Range Of LSN :
+              From LSN <0,3119032> ~
+                                       Until CANCEL
+             Applying .
+
+             recover at < 1, 306568 >
+             Flush All Memory ( 11 ) Dirty Pages.  Restoring unstable checkpoint images...
+                Restoring unstable checkpoint image [SYS_TBS_MEM_DIC-0-0]
+                Restoring unstable checkpoint image [SYS_TBS_MEM_DATA-0-0]
+                Writing to ..[SYS_TBS_DISK_DATA.DBF<ID:0>]
+                Writing to ..[SYS_TBS_DISK_UNDO.DBF<ID:0>]
+
+             Log Applied
+
+             updated resetlogs.
+  [ RECMGR ] Database media recovery successful.
+  [ RECMGR ] Memory tablespace checkpoint image restoration complete.
+Alter success.
+iSQL(sysdba)>
+iSQL(sysdba)> alter database recovery database until cancel;
+[ERR-31001 : SQL syntax error
+
+line 1: parse error
+alter database RECOVERY database until CANCEL
+                                       ^
+
+]
+iSQL(sysdba)> alter database recovery database;
+[ERR-31001 : SQL syntax error
+0001 : alter database RECOVERY database
+                     ^       ^
+]
+iSQL(sysdba)> alter database recover database until cancel;
+  [ RECMGR ] Checking database consistency..
+             Memory Redo LSN <0,3119032> - <4294967295,4294967295>
+             Disk Redo LSN <0,3119032> - <4294967295,4294967295>
+             Total 4 database file(s)
+             Memory 2 Checkpoint Image(s)
+             Disk 2 Database File(s)
+  [ RECMGR ] Restoring corrupted memory tablespace checkpoint images
+  [ RECMGR ] Loading memory tablespace checkpoint images from backup media
+  [ RECMGR ] Restoring database consistency
+             Suggestion Range Of LSN :
+              From LSN <0,3119032> ~
+                                       Until CANCEL
+             Applying .
+
+             recover at < 1, 306568 >
+             Flush All Memory ( 11 ) Dirty Pages.  Restoring unstable checkpoint images...
+                Restoring unstable checkpoint image [SYS_TBS_MEM_DIC-0-0]
+                Restoring unstable checkpoint image [SYS_TBS_MEM_DATA-0-0]
+                Writing to ..[SYS_TBS_DISK_DATA.DBF<ID:0>]
+                Writing to ..[SYS_TBS_DISK_UNDO.DBF<ID:0>]
+
+             Log Applied
+
+             updated resetlogs.
+  [ RECMGR ] Database media recovery successful.
+  [ RECMGR ] Memory tablespace checkpoint image restoration complete.
+Alter success.
+iSQL(sysdba)> alter database mydb meta resetlogs;
+
+
+TRANSITION TO PHASE : META
+  [SM] Recovery Phase - 0 : Reset logfiles
+     Archive Deleting logfile1
+     [ SUCCESS ]
+     Online  Deleting logfile2...*
+     [ SUCCESS ]
+     Reset log sequence number < 1,306568 >
+
+     [ SUCCESS ][SUCCESS]
+  [SM] Recovery Phase - 1 : Preparing Database
+                          : Dynamic Memory Version => Parallel Loading
+  [SM] Recovery Phase - 2 : Loading Database
+  [SM] Recovery Phase - 3 : Starting Recovery
+                            Initializing Active Transaction List
+                            Redo
+.
+                            Refine Disk Table..
+                            Undo
+  [SM] Refine Memory Table : ........................................................................................................................................................................... [SUCCESS]
+  [SM] Rebuilding Indices [Total Count:134] ...................................................................................................................................... [SUCCESS]
+Alter success.
+iSQL(sysdba)>
+
+
+iSQL(sysdba)> alter database mydb service;
+
+
+TRANSITION TO PHASE : SERVICE
+  [CM] Listener started : TCP on port 20300 [IPV4]
+  [CM] Listener started : UNIX
+  [CM] Listener started : IPC
+  [RP] Initialization : [PASS]
+
+--- STARTUP Process SUCCESS ---
+Alter success.
+iSQL(sysdba)> select * from test1;
+COL1
+--------------
+1
+2
+3
+3 rows selected.
+iSQL(sysdba)>
+
+
+
+
+
+
+
+
+
+
+
